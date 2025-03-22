@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Chamados</title>
+</head>
+<body>
+    <h1>Relatório de Chamados</h1>
+    <button id="gerarExcel">Gerar Excel</button>
+
+    <script>
+        document.getElementById("gerarExcel").addEventListener("click", async () => {
+            try {
+                const response = await fetch("http://localhost:3000/gerar-relatorio");
+                if (!response.ok) throw new Error("Erro ao gerar Excel");
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "chamados_abertos.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch (error) {
+                alert("Erro ao gerar Excel. Veja o console para mais detalhes.");
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
