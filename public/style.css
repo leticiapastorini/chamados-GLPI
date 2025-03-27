@@ -1,0 +1,42 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #fefefe;
+}
+
+h1 {
+  color: #333;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.status-label {
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.9em;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.status-novo {
+  background-color: #2ecc71;
+}
+
+.status-atrib {
+  background-color: #3498db;
+}
+
+.status-pend {
+  background-color: #f39c12;
+}

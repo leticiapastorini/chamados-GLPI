@@ -1,33 +1,35 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de Chamados</title>
+  <meta charset="UTF-8" />
+  <title>Relatório de Chamados Abertos</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <h1>Relatório de Chamados</h1>
-    <button id="gerarExcel">Gerar Excel</button>
+  <h1>Relatório de Chamados Abertos</h1>
+  <p><strong>Total hoje:</strong> <span id="total-hoje">0</span></p>
+  <p><strong>Total agora:</strong> <span id="total-geral">0</span></p>
+  <p>
+    <strong>Chamados novos:</strong> <span id="qtd-novos">0</span> |
+    <strong>Chamados atribuídos:</strong> <span id="qtd-atribuidos">0</span> |
+    <strong>Chamados pendentes:</strong> <span id="qtd-pendentes">0</span> |
+    <strong>Total:</strong> <span id="qtd-total">0</span>
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Status</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody id="tabela-chamados"></tbody>
+  </table>
 
-    <script>
-        document.getElementById("gerarExcel").addEventListener("click", async () => {
-            try {
-                const response = await fetch("http://localhost:3000/gerar-relatorio");
-                if (!response.ok) throw new Error("Erro ao gerar Excel");
+  <button onclick="baixarTodos()">Baixar Todos</button>
+  <button onclick="baixarHoje()">Baixar Chamados de Hoje</button>
 
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "chamados_abertos.xlsx";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            } catch (error) {
-                alert("Erro ao gerar Excel. Veja o console para mais detalhes.");
-                console.error(error);
-            }
-        });
-    </script>
+  <script src="gerar_relatorio.js"></script>
 </body>
 </html>
