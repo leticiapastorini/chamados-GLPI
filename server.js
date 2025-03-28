@@ -7,8 +7,9 @@ const cors = require("cors");
 const app = express();
 const PORT = 3000;
 
+
+
 app.use(cors());
-app.use(express.static(path.join(__dirname, "public")));
 
 const APP_TOKEN = "vEZzuTcI02kgcKl3UQUgfvd2q3zq2riklGdy2R6x";
 const API_TOKEN = "f1BEzmMm2ZorzxCgpYwlmef5vmdhNM2zu29zdyxv";
@@ -59,13 +60,11 @@ async function obterTodosChamados(sessionToken) {
     todosChamados.push(...data);
     start += limit;
 
-    // Se retornou menos de 100, significa que acabou
     if (data.length < limit) break;
   }
 
   return todosChamados;
 }
-
 
 async function obterChamadosAbertos() {
   const sessionToken = await obterSessionToken();
@@ -103,9 +102,21 @@ function gerarPlanilhaExcel(chamados, nomeFolha) {
   return workbook;
 }
 
+app.use(cors());
+
+// ROTAS PERSONALIZADAS
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "public", "home.html"));
 });
+
+app.get("/detalhes", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "detalhes.html"));
+});
+
+// ⬇️ Somente depois disso o static
+app.use(express.static(path.join(__dirname, "public")));
+
+
 
 app.get("/chamados", async (req, res) => {
   try {
