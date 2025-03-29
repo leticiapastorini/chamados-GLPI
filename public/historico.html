@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Histórico de Chamados Abertos</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="historico.js" defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    input[type="month"] {
+      padding: 8px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    tr.excedeu {
+      background-color: #ffe6e6;
+      color: #d80000;
+      font-weight: bold;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Histórico de Chamados Abertos</h1>
+
+  <label for="filtroData">Filtrar por mês:</label>
+  <input type="month" id="filtroData" />
+
+  <table id="tabelaHistorico">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Total de Chamados</th>
+      </tr>
+    </thead>
+    <tbody></tbody> <!-- ✅ Aqui o tbody correto -->
+  </table>
+  <div id="mediaMensal" style="margin-top: 15px; font-size: 18px;"></div>
+
+  <button onclick="exportarExcel()">Exportar Histórico do Mês</button>
+</body>
+</html>

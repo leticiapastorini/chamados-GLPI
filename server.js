@@ -177,3 +177,107 @@ app.get("/gerar-relatorio-hoje", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
 });
+
+
+// ... (seu código anterior permanece igual acima)
+
+// Adições abaixo:
+
+const fs = require("fs");
+const cron = require("node-cron");
+
+const pastaRelatorios = path.join(__dirname, "relatorios");
+if (!fs.existsSync(pastaRelatorios)) {
+  fs.mkdirSync(pastaRelatorios);
+  console.log("📂 Pasta 'relatorios/' criada automaticamente.");
+}
+
+// Gera snapshot diário às 18h
+async function registrarSnapshotDiario() {
+  try {
+    const sessionToken = await obterSessionToken();
+    const todos = await obterTodosChamados(sessionToken);
+    const hoje = new Date().toISOString().split("T")[0];
+    const doDia = todos.filter(c => c.date_creation?.startsWith(hoje));
+    const total = doDia.length;
+
+    const [ano, mes] = hoje.split("-");
+    const arquivo = path.join(pastaRelatorios, `relatorio-${ano}-${mes}.xlsx`);
+
+    const workbook = fs.existsSync(arquivo)
+      ? await new ExcelJS.Workbook().xlsx.readFile(arquivo)
+      : new ExcelJS.Workbook();
+
+    const sheet = workbook.getWorksheet("Chamados") || workbook.addWorksheet("Chamados");
+    sheet.columns = [
+      { header: "Data", key: "data", width: 15 },
+      { header: "Total", key: "total", width: 15 },
+    ];
+
+    const jaExiste = sheet.getRows(2, sheet.rowCount)
+      ?.some(r => r.getCell(1).value === hoje);
+
+    if (!jaExiste) {
+      sheet.addRow({ data: hoje, total });
+      console.log(`📊 Snapshot salvo: ${hoje} - ${total} chamados`);
+    } else {
+      console.log(`ℹ️ Snapshot para ${hoje} já existe`);
+    }
+
+    // ✅ Se for o último dia do mês, calcula a média e adiciona
+    const hojeDate = new Date();
+    const ultimoDia = new Date(hojeDate.getFullYear(), hojeDate.getMonth() + 1, 0).getDate();
+    if (hojeDate.getDate() === ultimoDia) {
+      const totais = [];
+      sheet.eachRow((row, i) => {
+        if (i === 1) return;
+        const valor = row.getCell(2).value;
+        if (typeof valor === "number") totais.push(valor);
+      });
+
+      const media = (totais.reduce((a, b) => a + b, 0) / totais.length).toFixed(2);
+      sheet.addRow({ data: "Média", total: Number(media) });
+      console.log(`📈 Média do mês registrada: ${media}`);
+    }
+
+    await workbook.xlsx.writeFile(arquivo);
+  } catch (err) {
+    console.error("❌ Erro ao registrar snapshot:", err.message);
+  }
+}
+
+
+// Rota: JSON para historico.js
+app.get("/historico-json", async (req, res) => {
+  const mes = req.query.mes;
+  if (!mes) return res.status(400).json({ erro: "Informe o mês (YYYY-MM)" });
+
+  const caminho = path.join(pastaRelatorios, `relatorio-${mes}.xlsx`);
+  if (!fs.existsSync(caminho)) return res.json([]);
+
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile(caminho);
+  const sheet = wb.getWorksheet("Chamados");
+
+  const dados = [];
+  sheet.eachRow((row, i) => {
+    if (i === 1) return;
+    dados.push({
+      data: row.getCell(1).value,
+      total: row.getCell(2).value,
+    });
+  });
+
+  res.json(dados);
+});
+
+// Rota: baixar Excel do mês
+app.get("/exportar-historico", (req, res) => {
+  const mes = req.query.mes;
+  if (!mes) return res.status(400).send("Informe o mês (YYYY-MM)");
+
+  const arquivo = path.join(pastaRelatorios, `relatorio-${mes}.xlsx`);
+  if (!fs.existsSync(arquivo)) return res.status(404).send("Arquivo não encontrado");
+
+  res.download(arquivo);
+});
