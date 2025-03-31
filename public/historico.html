@@ -2,85 +2,58 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Histórico de Chamados Abertos</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="historico.js" defer></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 30px;
-      text-align: center;
-    }
-
-    h1 {
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-    input[type="month"] {
-      padding: 8px;
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      margin-top: 20px;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-
-    tr.excedeu {
-      background-color: #ffe6e6;
-      color: #d80000;
-      font-weight: bold;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0056b3;
-    }
-  </style>
+  <meta http-equiv="refresh" content="300" />
+  <title>Histórico de Chamados</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <h1>Histórico de Chamados Abertos</h1>
+  <div class="container">
+    <h1>📊 Histórico Diário de Chamados</h1>
 
-  <label for="filtroData">Filtrar por mês:</label>
-  <input type="month" id="filtroData" />
+    <label for="filtroMes">Filtrar por mês:</label>
+    <input type="month" id="filtroMes" />
 
-  <table id="tabelaHistorico">
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Total de Chamados</th>
-      </tr>
-    </thead>
-    <tbody></tbody> <!-- ✅ Aqui o tbody correto -->
-  </table>
-  <div id="mediaMensal" style="margin-top: 15px; font-size: 18px;"></div>
+    <button onclick="carregarHistorico()">🔄 Ver Histórico Diário</button>
+    <button onclick="exportarExcel()">📥 Baixar Excel do Mês</button>
 
-  <button onclick="exportarExcel()">Exportar Histórico do Mês</button>
+    <div class="alerta-meta" id="alertaMeta" style="display: none;">
+      ⚠️ Meta de 50 chamados excedida em alguns dias!
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaHistorico">
+        <!-- preenchido via JS -->
+      </tbody>
+    </table>
+
+    <canvas id="graficoHistorico" height="120"></canvas>
+
+    <hr style="margin: 40px 0;">
+
+    <h2>📅 Relatório por Período</h2>
+    <label for="mesRef">Mês de Referência:</label>
+    <input type="month" id="mesRef" onchange="atualizarDatasPeriodo()" />
+
+    <br /><br />
+    <label for="dataInicio">De:</label>
+    <input type="date" id="dataInicio" readonly />
+
+    <label for="dataFim">Até:</label>
+    <input type="date" id="dataFim" readonly />
+
+    <br /><br />
+    <button onclick="baixarRelatorioPeriodo()">📥 Exportar Relatório do Período</button>
+  </div>
+
+  <script src="js/historico.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/relatorio_periodo.js"></script>
 </body>
 </html>

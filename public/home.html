@@ -2,22 +2,23 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Chamados Abertos</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta http-equiv="refresh" content="300">
+  <title>Chamados Abertos - Home</title>
+  <link rel="stylesheet" href="css/style.css" />
   <style>
     body {
       background: #f0f4f8;
       font-family: Arial, sans-serif;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
       height: 100vh;
       margin: 0;
-      flex-direction: column;
     }
 
     .total-grande {
-      font-size: 100px;
+      font-size: 90px;
       font-weight: bold;
       color: #007bff;
       margin-bottom: 30px;
@@ -27,9 +28,6 @@
       font-size: 20px;
       color: #007bff;
       text-decoration: none;
-      border: none;
-      background: none;
-      cursor: pointer;
       border-bottom: 1px solid transparent;
       transition: border-bottom 0.2s ease;
     }
@@ -38,37 +36,28 @@
       border-bottom: 1px solid #007bff;
     }
 
-    #tela-loading {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background-color: white;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      font-weight: bold;
-      color: #007bff;
-      z-index: 9999;
-      flex-direction: column;
+    #erro-container {
+      background: #ffd4d4;
+      padding: 12px 18px;
+      color: #8b0000;
+      margin-top: 20px;
+      border-radius: 8px;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <!-- Total de chamados (inicia com "...") -->
   <div id="totalAtual" class="total-grande">...</div>
+  
+  <a href="detalhes.html" class="link-detalhes">Ver Detalhes</a>
+  <a href="dias.html" class="link-detalhes">📅 Ver Dias Salvos</a>
 
-  <!-- Botão de redirecionamento -->
-  <button onclick="irParaDetalhes()" class="link-detalhes">Detalhes</button>
-  <button onclick="window.location.href='historico.html'" class="link-detalhes">Ver Histórico</button>
-
-  <!-- Tela de carregamento ao clicar -->
-  <div id="tela-loading">Carregando chamados...</div>
-
+  <script src="js/falha_conexao.js"></script>
   <script>
     async function atualizarTotal() {
       try {
-        const res = await fetch("/chamados");
-        if (!res.ok) throw new Error("Erro na API");
+        const res = await fetch("http://localhost:3000/chamados");
+        if (!res.ok) throw new Error("Erro ao buscar chamados");
 
         const chamados = await res.json();
         document.getElementById("totalAtual").textContent = chamados.length;
@@ -76,58 +65,15 @@
         document.getElementById("erro-container")?.remove();
       } catch (err) {
         console.error("Erro ao buscar chamados:", err);
-        exibirErroConexaoSimples();
+        exibirErroConexao();
       }
     }
 
-    function exibirErroConexaoSimples() {
-      if (document.getElementById("erro-container")) return;
-
-      const erroDiv = document.createElement("div");
-      erroDiv.id = "erro-container";
-      erroDiv.style.backgroundColor = "#ffeeee";
-      erroDiv.style.border = "1px solid #ff0000";
-      erroDiv.style.padding = "10px";
-      erroDiv.style.marginTop = "20px";
-      erroDiv.style.color = "#aa0000";
-      erroDiv.style.textAlign = "center";
-      erroDiv.style.borderRadius = "8px";
-
-      erroDiv.innerHTML = `
-        <p>❌ Erro ao conectar com o servidor GLPI</p>
-        <button onclick="tentarRecarregar()">Tentar novamente</button>
-      `;
-
-      document.body.appendChild(erroDiv);
-    }
-
-    function tentarRecarregar() {
-      document.getElementById("erro-container")?.remove();
-      atualizarTotal();
-    }
-
-    async function irParaDetalhes() {
-      const overlay = document.getElementById("tela-loading");
-      overlay.style.display = "flex";
-
-      try {
-        const res = await fetch("/chamados");
-        if (!res.ok) throw new Error("Erro na API");
-
-        await res.json(); // só garantir que carregou
-        window.location.href = "detalhes";
-      } catch (err) {
-        console.error("Erro ao buscar dados:", err);
-        overlay.style.display = "none";
-        alert("Erro ao carregar dados. Verifique a conexão.");
-      }
-    }
-
-    // Ao carregar a página
     window.addEventListener("DOMContentLoaded", () => {
       atualizarTotal();
       setInterval(atualizarTotal, 300000); // 5 minutos
     });
   </script>
 </body>
+
 </html>

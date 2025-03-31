@@ -2,39 +2,40 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Relatório de Chamados Abertos</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Chamados Abertos - Detalhes</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <h1>Relatório de Chamados Abertos</h1>
-  <p><strong>Total hoje:</strong> <span id="total-hoje">0</span></p>
-  <p><strong>Total agora:</strong> <span id="total-geral">0</span></p>
-  <p>
-    <strong>Chamados novos:</strong> <span id="qtd-novos">0</span> |
-    <strong>Chamados atribuídos:</strong> <span id="qtd-atribuidos">0</span> |
-    <strong>Chamados pendentes:</strong> <span id="qtd-pendentes">0</span> |
-    <strong>Total:</strong> <span id="qtd-total">0</span>
-  </p>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Título</th>
-        <th>Status</th>
-        <th>Data</th>
-      </tr>
-    </thead>
-    <tbody id="tabela-chamados"></tbody>
-  </table>
+  <div class="container">
+    <h1>Chamados Abertos</h1>
 
-  <button onclick="baixarTodos()">Baixar Todos</button>
-  <button onclick="baixarHoje()">Baixar Chamados de Hoje</button>
+    <div class="contadores">
+      <span class="contador"><strong>Novos:</strong> <span id="qtd-novos">0</span></span>
+      <span class="contador"><strong>Atribuídos:</strong> <span id="qtd-atribuidos">0</span></span>
+      <span class="contador"><strong>Pendentes:</strong> <span id="qtd-pendentes">0</span></span>
+      <span class="contador total"><strong>Total:</strong> <span id="qtd-total">0</span></span>
+    </div>
 
-  <!-- ✅ Scripts no final, após o DOM -->
-  <script src="gerar_relatorio.js"></script>
-  <script src="falha_conexao.js"></script>
+    <div class="acoes">
+      <button onclick="baixarTodos()">📥 Baixar Excel Completo</button>
+      <button onclick="baixarHoje()">📅 Baixar Excel de Hoje</button>
+    </div>
 
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Status</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody id="tabela-chamados">
+        <!-- preenchido via JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="js/gerar_relatorio.js"></script>
 </body>
-<a href="historico.html" style="margin-left: 20px;">📊 Histórico Diário</a>
-
 </html>

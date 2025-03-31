@@ -3,18 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <title>Relatórios de Chamados</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f0f4f8;
       padding: 40px;
       text-align: center;
-    }
-
-    h1 {
-      color: #333;
-      margin-bottom: 20px;
     }
 
     .relatorios-container {
@@ -38,7 +33,7 @@
       margin-top: 5px;
     }
 
-    button, a.btn-link {
+    .btn-link, button {
       margin-top: 20px;
       padding: 12px 24px;
       font-size: 16px;
@@ -51,24 +46,30 @@
       display: inline-block;
     }
 
-    button:hover, a.btn-link:hover {
+    .btn-link:hover, button:hover {
       background: #0056b3;
+    }
+
+    .extra-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 30px;
     }
   </style>
 </head>
 <body>
   <div class="relatorios-container">
-    <h1>Relatórios de Chamados</h1>
+    <h1>📊 Relatórios de Chamados</h1>
 
     <label for="filtroMes">Escolha o mês:</label>
     <input type="month" id="filtroMes" />
 
-    <div>
-      <a href="historico.html" class="btn-link">📊 Ver Histórico Diário</a>
-    </div>
+    <button onclick="baixarExcel()">📥 Baixar Excel do Mês</button>
 
-    <div>
-      <button onclick="baixarExcel()">📥 Baixar Excel do Mês</button>
+    <div class="extra-buttons">
+      <a href="historico.html" class="btn-link">📅 Ver Histórico Diário</a>
+      <a href="relatorio18h.html" class="btn-link">🕕 Ver Relatório 18h</a>
     </div>
   </div>
 
@@ -82,7 +83,6 @@
       window.location.href = `/exportar-historico?mes=${mes}`;
     }
 
-    // Seleciona mês atual automaticamente
     window.addEventListener("DOMContentLoaded", () => {
       document.getElementById("filtroMes").value = new Date().toISOString().slice(0, 7);
     });
