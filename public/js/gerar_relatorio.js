@@ -1,6 +1,6 @@
 async function carregarChamados() {
     try {
-      const res = await fetch("http://localhost:3000/chamados");
+      const res = await fetch("/chamados");
       const chamados = await res.json();
       atualizarTabela(chamados);
     } catch (err) {
@@ -39,11 +39,11 @@ async function carregarChamados() {
   }
   
   function baixarTodos() {
-    window.location.href = "http://localhost:3000/gerar-relatorio";
+    window.location.href = "/gerar-relatorio";
   }
   
   function baixarHoje() {
-    window.location.href = "http://localhost:3000/gerar-relatorio-hoje";
+    window.location.href = "/gerar-relatorio-hoje";
   }
   
   // Inicializa carregamento ao abrir a página

@@ -56,7 +56,7 @@
   <script>
     async function atualizarTotal() {
       try {
-        const res = await fetch("http://localhost:3000/chamados");
+        const res = await fetch("http://localhost:3001/glpi-chamados/chamados");
         if (!res.ok) throw new Error("Erro ao buscar chamados");
 
         const chamados = await res.json();

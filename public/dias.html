@@ -101,40 +101,51 @@
       const mes = document.getElementById("mesFiltro").value;
       const filtro = document.getElementById("filtroQuantidade").value;
 
-      if (!mes) return alert("Selecione um mês");
+      if (!mes) {
+        return alert("Selecione um mês");
+      }
 
-      const res = await fetch(`http://localhost:3000/dias-json?mes=${mes}`);
-      const dados = await res.json();
+      try {
+        // Ajuste para o prefixo /glpi-chamados
+        const res = await fetch(`/glpi-chamados/dias-json?mes=${mes}`);
+        if (!res.ok) throw new Error("Não foi possível obter os dados.");
 
-      const tabela = document.getElementById("tabelaDias");
-      tabela.innerHTML = "";
+        const dados = await res.json();
+        const tabela = document.getElementById("tabelaDias");
+        tabela.innerHTML = "";
 
-      let total = 0;
-      let count = 0;
+        let total = 0;
+        let count = 0;
 
-      const filtrados = dados.filter(d => {
-        if (filtro === "ate50") return d.total <= 50;
-        if (filtro === "acima50") return d.total > 50;
-        return true;
-      });
+        // Aplica o filtro "ate50" ou "acima50"
+        const filtrados = dados.filter(d => {
+          if (filtro === "ate50") return d.total <= 50;
+          if (filtro === "acima50") return d.total > 50;
+          return true; // "todos"
+        });
 
-      filtrados.forEach(d => {
-        const tr = document.createElement("tr");
+        filtrados.forEach(d => {
+          const tr = document.createElement("tr");
 
-        if (d.total > 50) {
-          tr.style.backgroundColor = "#ffe0e0";
-          tr.style.color = "#8b0000";
-        }
+          if (d.total > 50) {
+            tr.style.backgroundColor = "#ffe0e0";
+            tr.style.color = "#8b0000";
+          }
 
-        tr.innerHTML = `<td>${d.data}</td><td>${d.total}</td>`;
-        tabela.appendChild(tr);
+          tr.innerHTML = `<td>${d.data}</td><td>${d.total}</td>`;
+          tabela.appendChild(tr);
 
-        total += Number(d.total);
-        count++;
-      });
+          total += Number(d.total);
+          count++;
+        });
 
-      const media = count > 0 ? Math.round(total / count) : 0;
-      document.getElementById("mediaFinal").textContent = `📊 Média de chamados abertos por dia: ${media}`;
+        const media = count > 0 ? Math.round(total / count) : 0;
+        document.getElementById("mediaFinal").textContent =
+          `📊 Média de chamados abertos por dia: ${media}`;
+      } catch (err) {
+        console.error("Erro ao carregar dias:", err);
+        alert("Erro ao carregar dados. Verifique o console para mais detalhes.");
+      }
     }
 
     function baixarExcelDias() {
@@ -143,11 +154,13 @@
         alert("Selecione um mês");
         return;
       }
-      window.location.href = `http://localhost:3000/exportar-dias?mes=${mes}`;
+      // Ajuste para o prefixo /glpi-chamados
+      window.location.href = `/glpi-chamados/exportar-dias?mes=${mes}`;
     }
 
     window.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("mesFiltro").value = new Date().toISOString().slice(0, 7);
+      document.getElementById("mesFiltro").value =
+        new Date().toISOString().slice(0, 7);
     });
   </script>
 </body>
