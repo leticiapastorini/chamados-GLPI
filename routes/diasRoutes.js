@@ -40,6 +40,7 @@ router.get("/dias-json", async (req, res) => {
   }
 });
 
+// ✅ Rota correta para baixar o Excel já salvo automaticamente
 router.get("/exportar-dias", async (req, res) => {
   try {
     const { mes } = req.query;
