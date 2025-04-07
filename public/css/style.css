@@ -1,107 +1,105 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f7fb;
-    margin: 0;
-    padding: 20px;
-    color: #333;
-  }
-  
-  .container {
-    max-width: 1000px;
-    margin: auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  
-  h1, h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .contadores {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-  }
-  
-  .contador {
-    font-size: 18px;
-    margin: 5px 10px;
-  }
-  
-  .contador.total {
-    font-weight: bold;
-  }
-  
-  button, .btn-link {
-    padding: 10px 20px;
-    background-color: #007bff;
-    border: none;
-    color: white;
-    border-radius: 5px;
-    margin: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    text-decoration: none;
-  }
-  
-  button:hover, .btn-link:hover {
-    background-color: #0056b3;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    font-size: 15px;
-  }
-  
-  table th, table td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: left;
-  }
-  
-  table th {
-    background-color: #f1f1f1;
-  }
-  
-  .status-label {
-    padding: 5px 10px;
-    border-radius: 5px;
-    color: white;
-    font-weight: bold;
-  }
-  
-  .status-novo {
-    background-color: #28a745;
-  }
-  
-  .status-atrib {
-    background-color: #17a2b8;
-  }
-  
-  .status-pend {
-    background-color: #ffc107;
-  }
-  
-  .alerta-meta {
-    background-color: #ffdddd;
-    color: #a30000;
-    padding: 10px;
-    margin-top: 20px;
-    border: 1px solid #ffaaaa;
-    border-radius: 5px;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  input[type="month"], input[type="date"] {
-    padding: 8px;
-    font-size: 16px;
-    margin: 5px;
-  }
-  
+  font-family: Arial, sans-serif;
+  background-color: #ffffff; /* Fundo branco */
+  margin: 0;
+  padding: 20px;
+  color: #fc0404; /* Texto vermelho */
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  border: 2px solid #f8cfcf; /* Vermelho clarinho */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+h1, h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #fc0404;
+}
+
+.contadores {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.contador {
+  font-size: 18px;
+  margin: 5px 10px;
+  color: #fc0404;
+}
+
+.contador.total {
+  font-weight: bold;
+}
+
+button, .btn-link {
+  padding: 10px 20px;
+  background-color: #fc0404; /* Vermelho base */
+  border: 2px solid transparent;
+  color: white;
+  border-radius: 5px;
+  margin: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+button:hover, .btn-link:hover {
+  background-color: #c90303;
+  box-shadow: 0 0 10px #b9c407; /* Sombra verde ao hover */
+}
+
+.total-grande {
+  font-size: 64px;
+  text-align: center;
+  font-weight: bold;
+  color: #fc0404;
+  margin-top: 40px;
+}
+
+input[type="month"],
+input[type="date"],
+select {
+  padding: 8px;
+  font-size: 16px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+table th {
+  background-color: #f1f1f1;
+  color: #fc0404;
+}
+
+.alerta-meta {
+  background-color: #ffdddd;
+  color: #a30000;
+  padding: 10px;
+  margin-top: 20px;
+  border: 1px solid #ffaaaa;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+}

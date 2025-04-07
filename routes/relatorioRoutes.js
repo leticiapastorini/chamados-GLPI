@@ -1,5 +1,7 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
+const ExcelJS = require("exceljs");
 const {
   obterChamadosAbertos,
   obterTodosChamados,
@@ -49,7 +51,7 @@ router.get("/gerar-relatorio-hoje", async (req, res) => {
   }
 });
 
-// Rota: exportar histórico mensal
+// Rota: exportar histórico mensal em JSON
 router.get("/historico-json", async (req, res) => {
   try {
     const { mes } = req.query;
@@ -113,9 +115,8 @@ router.get("/forcar-snapshot-hoje", async (req, res) => {
     res.status(500).send("Erro ao forçar snapshot.");
   }
 });
-const fs = require("fs");
-const ExcelJS = require("exceljs");
 
+// Rota: retornar dados do Excel de 18h em JSON
 router.get("/relatorio-18h-json", async (req, res) => {
   try {
     const { mes } = req.query;
@@ -149,27 +150,27 @@ router.get("/relatorio-18h-json", async (req, res) => {
   }
 });
 
+// Rota: exportar Excel das 18h
 router.get("/exportar-18h", async (req, res) => {
-    try {
-      const { mes } = req.query;
-      if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório.");
-  
-      const [ano, mesNum] = mes.split("-");
-      const nomeArquivo = `relatorio-18h-${ano}-${mesNum}.xlsx`;
-      const caminho = path.join(__dirname, "..", "relatorios", nomeArquivo);
-  
-      if (!fs.existsSync(caminho)) {
-        return res.status(404).send("Relatório não encontrado.");
-      }
-  
-      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-      res.setHeader("Content-Disposition", `attachment; filename=${nomeArquivo}`);
-      fs.createReadStream(caminho).pipe(res);
-    } catch (err) {
-      console.error("Erro ao exportar Excel 18h:", err.message);
-      res.status(500).send("Erro ao exportar Excel 18h");
+  try {
+    const { mes } = req.query;
+    if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório.");
+
+    const [ano, mesNum] = mes.split("-");
+    const nomeArquivo = `relatorio-18h-${ano}-${mesNum}.xlsx`;
+    const caminho = path.join(__dirname, "..", "relatorios", nomeArquivo);
+
+    if (!fs.existsSync(caminho)) {
+      return res.status(404).send("Relatório não encontrado.");
     }
-  });
-  
+
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename=${nomeArquivo}`);
+    fs.createReadStream(caminho).pipe(res);
+  } catch (err) {
+    console.error("Erro ao exportar Excel 18h:", err.message);
+    res.status(500).send("Erro ao exportar Excel 18h");
+  }
+});
 
 module.exports = router;

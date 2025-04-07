@@ -5,60 +5,48 @@ const ExcelJS = require("exceljs");
 
 const router = express.Router();
 
-const PASTA_RELATORIOS = path.join(__dirname, "..", "relatorios");
-
-router.get("/dias-json", async (req, res) => {
+// Rota: buscar dias registrados por mês com média final
+router.get("/", async (req, res) => {
   try {
-    const { mes } = req.query;
-    if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório");
+    const { mes, quantidade } = req.query;
+    if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório.");
 
     const [ano, mesNum] = mes.split("-");
-    const nomeArquivo = `dias-salvos-${ano}-${mesNum}.xlsx`;
-    const caminho = path.join(PASTA_RELATORIOS, nomeArquivo);
+    const nomeArquivo = `relatorio-18h-${ano}-${mesNum}.xlsx`;
+    const caminho = path.join(__dirname, "..", "relatorios", nomeArquivo);
 
-    if (!fs.existsSync(caminho)) return res.json([]);
+    if (!fs.existsSync(caminho)) return res.json({ dias: [], media: 0 });
 
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(caminho);
-    const sheet = workbook.getWorksheet("Dias");
+    const sheet = workbook.getWorksheet("Chamados18h");
 
-    const dados = [];
+    const dias = [];
+    sheet.eachRow((row, i) => {
+      const label = row.getCell(1).value;
+      const total = row.getCell(3).value;
 
-    sheet.eachRow((row, idx) => {
-      if (idx === 1 || row.getCell(1).value === "Média") return;
+      if (label === "Média" || i === 1) return;
 
-      dados.push({
-        data: row.getCell(1).text,
-        total: Number(row.getCell(2).value)
-      });
+      const mostrar =
+        quantidade === "todos" ||
+        (quantidade === "ate50" && total <= 50) ||
+        (quantidade === "mais50" && total > 50);
+
+      if (mostrar) {
+        dias.push({ data: label, total });
+      }
     });
 
-    res.json(dados);
+    const mediaRow = sheet.findRow(sheet.rowCount);
+    const media = mediaRow.getCell(1).value === "Média"
+      ? mediaRow.getCell(3).value
+      : 0;
+
+    res.json({ dias, media });
   } catch (err) {
-    console.error("❌ Erro ao buscar dias:", err.message);
+    console.error("Erro ao buscar dias do relatório:", err.message);
     res.status(500).send("Erro ao buscar dias");
-  }
-});
-
-// ✅ Rota correta para baixar o Excel já salvo automaticamente
-router.get("/exportar-dias", async (req, res) => {
-  try {
-    const { mes } = req.query;
-    if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório");
-
-    const [ano, mesNum] = mes.split("-");
-    const nomeArquivo = `dias-salvos-${ano}-${mesNum}.xlsx`;
-    const caminho = path.join(PASTA_RELATORIOS, nomeArquivo);
-
-    if (!fs.existsSync(caminho)) return res.status(404).send("Arquivo não encontrado.");
-
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", `attachment; filename=${nomeArquivo}`);
-
-    fs.createReadStream(caminho).pipe(res);
-  } catch (err) {
-    console.error("❌ Erro ao exportar dias:", err.message);
-    res.status(500).send("Erro ao exportar Excel");
   }
 });
 

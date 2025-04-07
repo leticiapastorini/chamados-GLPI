@@ -1,95 +1,71 @@
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
 const ExcelJS = require("exceljs");
-const { obterTodosChamados } = require("./glpiService");
+const { obterChamadosAbertos } = require("./glpiService");
+const { escreverLog } = require("../utils/logger");
 
-// Caminho da pasta onde os relatórios serão salvos
-const PASTA_RELATORIOS = path.join(__dirname, "..", "relatorios");
-
-// Verifica se a pasta existe, caso contrário, cria-a
-if (!fs.existsSync(PASTA_RELATORIOS)) {
-  fs.mkdirSync(PASTA_RELATORIOS);
-  console.log("📁 Pasta 'relatorios/' criada automaticamente.");
-}
-
-// Função para registrar os chamados abertos às 18h
 async function registrarChamadosAbertos18h() {
   try {
-    // Obtém todos os chamados
-    const todos = await obterTodosChamados();
-    
-    // Data e hora atuais
+    const chamados = await obterChamadosAbertos();
     const agora = new Date();
-    const hoje = agora.toISOString().split("T")[0];  // Formato YYYY-MM-DD
-    const hora = "18:00";  // Hora de registro
 
-    // Filtra chamados com status "Novo", "Atribuído" e "Pendente"
-    const abertos = todos.filter(c =>
-      [1, 2, 4].includes(Number(c.status))  // Considera apenas chamados abertos
-    );
-
-    const total18h = abertos.length;  // Total de chamados abertos
-
-    // Divide a data para criar o nome do arquivo (ano e mês)
-    const [ano, mes] = hoje.split("-");
-    const nomeArquivo = `relatorio-18h-${ano}-${mes}.xlsx`;  // Nome do arquivo com data
-    const caminho = path.join(PASTA_RELATORIOS, nomeArquivo);  // Caminho do arquivo
+    const data = agora.toISOString().split("T")[0];
+    const hora = agora.toTimeString().split(" ")[0].substring(0, 5);
+    const anoMes = data.substring(0, 7); // yyyy-MM
+    const arquivo = path.join(__dirname, "..", "relatorios", `relatorio-18h-${anoMes}.xlsx`);
 
     let workbook;
-    let sheet;
-
-    // Verifica se o arquivo já existe, caso contrário, cria um novo
-    if (fs.existsSync(caminho)) {
+    if (fs.existsSync(arquivo)) {
       workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.readFile(caminho);  // Lê o arquivo existente
-      sheet = workbook.getWorksheet("Chamados18h");  // Seleciona a aba "Chamados18h"
+      await workbook.xlsx.readFile(arquivo);
     } else {
       workbook = new ExcelJS.Workbook();
-      sheet = workbook.addWorksheet("Chamados18h");  // Cria uma nova aba "Chamados18h"
-      sheet.columns = [
-        { header: "Data", key: "data", width: 15 },  // Definindo cabeçalhos das colunas
-        { header: "Hora", key: "hora", width: 10 },
-        { header: "Total", key: "total", width: 15 }
-      ];
     }
 
-    // Verifica se já existe um registro para o dia de hoje
-    const jaRegistrado = sheet.getRows(2, sheet.rowCount)
-      ?.some(row => row.getCell(1).value === hoje);
+    const sheet = workbook.getWorksheet("18h") || workbook.addWorksheet("18h");
 
-    // Se não houver registro, adiciona o novo
-    if (!jaRegistrado) {
-      sheet.addRow({ data: hoje, hora: hora, total: total18h });
-      console.log(`🕕 Registro 18h salvo: ${hoje} - ${total18h} chamados abertos`);
-    } else {
-      console.log(`📌 Já existe registro para ${hoje} às 18h`);
-    }
-
-    // Recalcula a média de chamados abertos durante o mês
-    const totais = [];
-    sheet.eachRow((row, i) => {
-      if (i === 1 || row.getCell(1).value === "Média") return;  // Ignora o cabeçalho e linha de "Média"
-      const val = row.getCell(3).value;
-      if (typeof val === "number") totais.push(val);
+    // Remover linha "Média" existente
+    sheet.eachRow((row, idx) => {
+      if (row.getCell(1).value === "Média") {
+        sheet.spliceRows(idx, 1);
+      }
     });
 
-    // Calcula a média
-    const media = Math.round(totais.reduce((a, b) => a + b, 0) / totais.length);
-    const ultima = sheet.lastRow.getCell(1).value;
+    // Adicionar linha do dia
+    sheet.addRow({
+      data,
+      hora,
+      total: chamados.length
+    });
 
-    // Se não houver linha "Média", cria uma nova; senão, atualiza a existente
-    if (ultima !== "Média") {
+    // Recalcular média após adicionar o novo dia
+    const dados = [];
+    sheet.eachRow((row, idx) => {
+      const val = row.getCell(1).value;
+      if (val !== "Data" && val !== "Média" && val instanceof Date === false) {
+        dados.push({
+          data: row.getCell(1).value,
+          hora: row.getCell(2).value,
+          total: parseInt(row.getCell(3).value || 0)
+        });
+      }
+    });
+
+    if (dados.length > 0) {
+      const media = Math.round(
+        dados.reduce((acc, item) => acc + (item.total || 0), 0) / dados.length
+      );
       sheet.addRow({ data: "Média", hora: "", total: media });
-    } else {
-      sheet.lastRow.getCell(3).value = media;
     }
 
-    // Salva o arquivo atualizado
-    await workbook.xlsx.writeFile(caminho);
+    await workbook.xlsx.writeFile(arquivo);
+
+    escreverLog(`Snapshot das 18h salvo com ${chamados.length} chamados`);
+    console.log(`📸 Snapshot diário salvo: ${data} - ${chamados.length} chamados`);
   } catch (err) {
-    console.error("❌ Erro ao salvar chamados 18h:", err.message);  // Tratamento de erro
+    console.error("Erro ao registrar snapshot das 18h:", err);
+    escreverLog("❌ Erro ao salvar snapshot das 18h: " + err.message);
   }
 }
 
-// Exporta a função para ser utilizada em outros módulos
 module.exports = { registrarChamadosAbertos18h };

@@ -1,0 +1,20 @@
+<section class="container">
+  <h1>📆 Relatório de Chamados às 18h</h1>
+  <div style="text-align: center;">
+    <input type="month" id="mesFiltro" />
+    <select id="filtroQuantidade">
+      <option value="todos">Todos</option>
+      <option value="ate50">Até 50</option>
+      <option value="mais50">Mais de 50</option>
+    </select>
+    <button id="buscarBtn">🔍 Buscar</button>
+    <button onclick="baixarExcel()">⬇️ Baixar Excel do Mês</button>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Data</th><th>Total</th></tr>
+    </thead>
+    <tbody id="tabelaDias"></tbody>
+  </table>
+  <p id="mediaDias" style="text-align:center; font-weight:bold;"></p>
+</section>

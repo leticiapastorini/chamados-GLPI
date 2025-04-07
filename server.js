@@ -7,11 +7,12 @@ const path = require("path");
 const cors = require("cors");
 const cron = require("node-cron");
 
-const NODE_ENV = process.env.NODE_ENV || "development"; // Detecta o ambiente
-// Escolhe a URL da API com base no ambiente
-const API_URL = process.env.NODE_ENV === "production" ? process.env.API_URL_PROD : process.env.API_URL_DEV;
+const NODE_ENV = process.env.NODE_ENV || "development";
+const API_URL = NODE_ENV === "production" ? process.env.API_URL_PROD : process.env.API_URL_DEV;
 const PORT = process.env.PORT || 3001;
-console.log("Ambiente de execução:", process.env.NODE_ENV);
+
+console.log("Ambiente de execução:", NODE_ENV);
+console.log("INICIADO PELO AGENDADOR");
 
 const { registrarSnapshotDiario } = require("./services/snapshotService");
 const { registrarChamadosAbertos18h } = require("./services/snapshot18hService");
@@ -21,33 +22,40 @@ const chamadosRoutes = require("./routes/chamadosRoutes");
 const relatorioRoutes = require("./routes/relatorioRoutes");
 const diasRoutes = require("./routes/diasRoutes");
 
+const now = new Date();
+//const hora = now.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }).split(" ")[1].split(":")[0];
+//const minutos = now.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }).split(" ")[1].split(":")[1];
+
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Usar o prefixo /glpi-chamados para todas as rotas
-app.use('/glpi-chamados', chamadosRoutes);  // Isso vai fazer suas rotas ficarem com o prefixo "/glpi-chamados"
-
-// Outras rotas (relatórios e dias)
+// Rotas
+app.use('/glpi-chamados', chamadosRoutes);
 app.use('/glpi-chamados', relatorioRoutes);
 app.use('/glpi-chamados', diasRoutes);
 
-// ✅ Cron consolidado às 18h
-//cron.schedule("0 18 * * *", () => {
-//  console.log("⏰ Executando tarefas automáticas das 18h...");
-//  registrarSnapshotDiario();
-//  registrarChamadosAbertos18h();
-//  registrarDiaChamados();
-//});
-
-cron.schedule("46 16 * * *", () => {
-  console.log("⏰ Executando tarefa automática das 18h (apenas contagem diária)...");
-  registrarDiaChamados();
+// ⏰ "00 21 * * *" → Executa todos os dias às 21h UTC = 18h BRT
+cron.schedule("00 21 * * *", () => {
+  console.log("⏰ Executando tarefa automática das 18h (horário Brasília)...");
+  registrarChamadosAbertos18h();
 });
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em ${API_URL}:${PORT} (${NODE_ENV})`);
-});
+
+// 🧪 Simulação manual de 18h para teste (roda 1 min após iniciar)
+setTimeout(() => {
+  console.log("⏱️ Executando registro manual (simulando 18h)");
+  registrarChamadosAbertos18h(); // ✅ CORRETO
+}, 60000);
+
+// Iniciar servidor (protegido contra múltiplas execuções)
+if (!module.parent) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Servidor rodando em http://localhost:${PORT} (${NODE_ENV})`);
+  });
+}
+
+
+app.use('/views', express.static(path.join(__dirname, 'views')));
