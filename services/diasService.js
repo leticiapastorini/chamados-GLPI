@@ -6,7 +6,6 @@ const { logToFile } = require("../utils/logger");
 
 const PASTA_RELATORIOS = path.join(__dirname, "..", "relatorios");
 
-// Cria pasta relatorios se não existir
 if (!fs.existsSync(PASTA_RELATORIOS)) {
   fs.mkdirSync(PASTA_RELATORIOS);
   console.log("📂 Pasta 'relatorios/' criada automaticamente.");
@@ -24,14 +23,12 @@ async function registrarDiaChamados() {
     const caminhoJson = path.join(PASTA_RELATORIOS, `dias-salvos-${ano}-${mes}.json`);
 
     const workbook = new ExcelJS.Workbook();
-
     let sheet;
 
     if (fs.existsSync(caminho)) {
       await workbook.xlsx.readFile(caminho);
       sheet = workbook.getWorksheet("Dias");
 
-      // se por algum motivo não existir, recria
       if (!sheet) {
         sheet = workbook.addWorksheet("Dias");
         sheet.columns = [
@@ -66,27 +63,26 @@ async function registrarDiaChamados() {
       console.log(`🗓️ Dia ${hoje} registrado com ${abertos.length} chamados.`);
     }
 
-    // Remove linha de média antiga se existir
-    const rows = sheet.getRows(2, sheet.rowCount - 1) || [];
-    const linhasValidas = rows.filter(row => row.getCell(1).value !== "Média");
-
-    const totais = [];
-    for (const row of linhasValidas) {
-      const data = row.getCell(1).value;
-      const total = Number(row.getCell(2).value);
-      if (data && !isNaN(total)) {
-        totais.push({ data, total });
-      }
-    }
-
-    const media = Math.round(totais.reduce((acc, curr) => acc + curr.total, 0) / totais.length || 0);
-
-    // Remove "Média" existente, se houver
+    // Remove linha de média antiga
     sheet.eachRow((row, idx) => {
       if (row.getCell(1).value === "Média") {
         sheet.spliceRows(idx, 1);
       }
     });
+
+    // Reconstroi totais com Acima da Meta
+    const totais = [];
+    sheet.eachRow((row, idx) => {
+      if (idx === 1) return;
+      const data = row.getCell(1).value;
+      const total = Number(row.getCell(2).value);
+      const acimaMeta = row.getCell(3).value;
+      if (data && typeof total === "number") {
+        totais.push({ data, total, acimaMeta: total > 50 ? "SIM" : "-" });
+      }
+    });
+
+    const media = Math.round(totais.reduce((acc, curr) => acc + curr.total, 0) / totais.length || 0);
 
     sheet.addRow({ data: "Média", total: media });
 
@@ -100,6 +96,5 @@ async function registrarDiaChamados() {
     console.error("❌ Erro ao registrar dia:", err);
   }
 }
-
 
 module.exports = { registrarDiaChamados };

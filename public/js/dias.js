@@ -8,10 +8,13 @@ async function carregarDias() {
     const res = await fetch(`/glpi-chamados/dias-json?mes=${mes}`);
     const dados = await res.json();
 
+    console.log("🚀 Dados recebidos:", dados);
+
     const tabela = document.getElementById("tabelaDias");
     tabela.innerHTML = "";
 
-    let total = 0, count = 0;
+    let total = 0;
+    let count = 0;
 
     dados.dias
       .filter(d => {
@@ -22,13 +25,21 @@ async function carregarDias() {
       .forEach(d => {
         const tr = document.createElement("tr");
 
+        const acimaMeta = d.total > 50 ? "SIM" : "-";
+
         if (d.total > 50) {
           tr.style.backgroundColor = "#ffe0e0";
           tr.style.color = "#8b0000";
         }
+        tr.innerHTML = `
+        <td>${d.data}</td>
+        <td>${d.total}</td>
+        <td>${d.total > 50 ? "SIM" : "-"}</td>
+      `;
+      
 
-        tr.innerHTML = `<td>${d.data}</td><td>${d.total}</td>`;
         tabela.appendChild(tr);
+
         total += Number(d.total);
         count++;
       });
@@ -36,7 +47,7 @@ async function carregarDias() {
     const media = dados.media || 0;
     document.getElementById("mediaDias").textContent = `📊 Média de chamados abertos por dia: ${media}`;
   } catch (error) {
-    console.error("Erro ao carregar dados dos dias:", error);
+    console.error("❌ Erro ao carregar dados dos dias:", error);
     alert("Erro ao carregar dados dos dias.");
   }
 }

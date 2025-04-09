@@ -1,4 +1,6 @@
 (async () => {
+  const totalDiv = document.getElementById("totalChamados");
+  if (!totalDiv) return;
   try {
     const res = await fetch("/glpi-chamados/chamados");
     const dados = await res.json();

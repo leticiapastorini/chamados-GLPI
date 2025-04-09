@@ -36,7 +36,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // Rotas
 app.use('/glpi-chamados', chamadosRoutes);
 app.use('/glpi-chamados', relatorioRoutes);
-app.use('/glpi-chamados', diasRoutes);
+app.use("/glpi-chamados", diasRoutes);
 
 // ⏰ "00 21 * * *" → Executa todos os dias às 21h UTC = 18h BRT
 cron.schedule("00 21 * * *", () => {
