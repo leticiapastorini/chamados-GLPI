@@ -1,86 +1,73 @@
 async function carregarDias() {
-    const mesInput = document.getElementById("mesFiltro");
-    const quantidadeInput = document.getElementById("filtroQuantidade");
-    const corpoTabela = document.getElementById("tabelaDias");
-    const mediaEl = document.getElementById("mediaDias");
-  
-    if (!mesInput || !quantidadeInput || !corpoTabela || !mediaEl) {
-      console.error("⚠️ Elementos não encontrados no DOM.");
-      return;
-    }
-  
-    const mes = (mesInput.value || "").trim(); // ex: "2025-04"
-    const quantidade = (quantidadeInput.value || "Todos").trim();
-  
-    try {
-      const res = await fetch(`/glpi-chamados/dias?mes=${mes}&quantidade=${quantidade}`);
-      if (!res.ok) throw new Error(`Erro ${res.status}: ${res.statusText}`);
-  
-      const resultado = await res.json();
-      const dados = resultado.dias || [];
-      const media = resultado.media || 0;
-  
-      corpoTabela.innerHTML = "";
-  
-      if (dados.length === 0) {
-        corpoTabela.innerHTML = "<tr><td colspan='2'>Nenhum dado encontrado para este mês.</td></tr>";
-        mediaEl.textContent = "Média: 0";
-        return;
-      }
-  
-      dados.forEach((dia) => {
-        const linha = document.createElement("tr");
-        linha.innerHTML = `
-          <td>${dia.data}</td>
-          <td>${dia.total}</td>
-        `;
-        if (dia.total > 50) {
-          linha.style.backgroundColor = "#ffdddd";
+  const mes = document.getElementById("mesFiltro").value;
+  const filtro = document.getElementById("filtroQuantidade").value;
+
+  if (!mes) return alert("Selecione um mês!");
+
+  try {
+    const res = await fetch(`/glpi-chamados/dias-json?mes=${mes}`);
+    const dados = await res.json();
+
+    const tabela = document.getElementById("tabelaDias");
+    tabela.innerHTML = "";
+
+    let total = 0, count = 0;
+
+    dados.dias
+      .filter(d => {
+        if (filtro === "ate50") return d.total <= 50;
+        if (filtro === "mais50") return d.total > 50;
+        return true;
+      })
+      .forEach(d => {
+        const tr = document.createElement("tr");
+
+        if (d.total > 50) {
+          tr.style.backgroundColor = "#ffe0e0";
+          tr.style.color = "#8b0000";
         }
-        corpoTabela.appendChild(linha);
+
+        tr.innerHTML = `<td>${d.data}</td><td>${d.total}</td>`;
+        tabela.appendChild(tr);
+        total += Number(d.total);
+        count++;
       });
-  
-      // Adiciona linha final de média
-      const linhaMedia = document.createElement("tr");
-      linhaMedia.innerHTML = `
-        <td><strong>Média</strong></td>
-        <td><strong>${media}</strong></td>
-      `;
-      linhaMedia.style.backgroundColor = "#e8f4ff";
-      corpoTabela.appendChild(linhaMedia);
-  
-      mediaEl.textContent = ""; // Esvazia se já mostramos na tabela
-    } catch (error) {
-      alert("Erro ao buscar dias do relatório.");
-      console.error(error);
-    }
+
+    const media = dados.media || 0;
+    document.getElementById("mediaDias").textContent = `📊 Média de chamados abertos por dia: ${media}`;
+  } catch (error) {
+    console.error("Erro ao carregar dados dos dias:", error);
+    alert("Erro ao carregar dados dos dias.");
   }
-  
-  document.addEventListener("DOMContentLoaded", () => {
-    const botaoBuscar = document.getElementById("buscarBtn");
-    if (botaoBuscar) {
-      botaoBuscar.addEventListener("click", carregarDias);
-    }
-  });
-  
-  async function baixarExcel() {
-    const mes = (document.getElementById("mesFiltro").value || "").trim();
-    if (!mes) return alert("Selecione um mês!");
-  
-    const url = `/glpi-chamados/exportar-18h?mes=${mes}`;
-  
-    try {
-      const res = await fetch(url, { method: "HEAD" });
-      if (!res.ok) throw new Error();
-  
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `relatorio-18h-${mes}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch {
-      alert("⚠️ Arquivo ainda não disponível para este mês.");
-    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const botaoBuscar = document.getElementById("buscarBtn");
+  if (botaoBuscar) {
+    botaoBuscar.addEventListener("click", carregarDias);
   }
-  
+
+  // Preenche o mês atual no seletor
+  document.getElementById("mesFiltro").value = new Date().toISOString().slice(0, 7);
+});
+
+async function baixarExcel() {
+  const mes = document.getElementById("mesFiltro").value;
+  if (!mes) return alert("Selecione um mês!");
+
+  const url = `/glpi-chamados/exportar-dias?mes=${mes}`;
+
+  try {
+    const res = await fetch(url, { method: "HEAD" });
+    if (!res.ok) throw new Error();
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `dias-salvos-${mes}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch {
+    alert("⚠️ Arquivo ainda não disponível para este mês.");
+  }
+}

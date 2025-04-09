@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="300" />
+  <title>Histórico de Chamados</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Histórico Diário de Chamados</h1>
+
+    <label for="filtroMes">Filtrar por mês:</label>
+    <input type="month" id="filtroMes" />
+
+    <button onclick="carregarHistorico()">🔄 Ver Histórico Diário</button>
+    <button onclick="exportarExcel()">📥 Baixar Excel do Mês</button>
+
+    <div class="alerta-meta" id="alertaMeta" style="display: none;">
+      ⚠️ Meta de 50 chamados excedida em alguns dias!
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaHistorico">
+        <!-- preenchido via JS -->
+      </tbody>
+    </table>
+
+    <canvas id="graficoHistorico" height="120"></canvas>
+
+    <hr style="margin: 40px 0;">
+
+    <h2>📅 Relatório por Período</h2>
+    <label for="mesRef">Mês de Referência:</label>
+    <input type="month" id="mesRef" onchange="atualizarDatasPeriodo()" />
+
+    <br /><br />
+    <label for="dataInicio">De:</label>
+    <input type="date" id="dataInicio" readonly />
+
+    <label for="dataFim">Até:</label>
+    <input type="date" id="dataFim" readonly />
+
+    <br /><br />
+    <button onclick="baixarRelatorioPeriodo()">📥 Exportar Relatório do Período</button>
+  </div>
+
+  <script src="js/historico.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/relatorio_periodo.js"></script>
+</body>
+</html>

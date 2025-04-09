@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="300">
+  <title>Chamados Abertos - Home</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      background: #f0f4f8;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .total-grande {
+      font-size: 90px;
+      font-weight: bold;
+      color: #007bff;
+      margin-bottom: 30px;
+    }
+
+    .link-detalhes {
+      font-size: 20px;
+      color: #007bff;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-bottom 0.2s ease;
+    }
+
+    .link-detalhes:hover {
+      border-bottom: 1px solid #007bff;
+    }
+
+    #erro-container {
+      background: #ffd4d4;
+      padding: 12px 18px;
+      color: #8b0000;
+      margin-top: 20px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="totalAtual" class="total-grande">...</div>
+  
+  <a href="detalhes.html" class="link-detalhes">Ver Detalhes</a>
+  <a href="dias.html" class="link-detalhes">📅 Ver Dias Salvos</a>
+
+  <script>
+    async function atualizarTotal() {
+      try {
+        const res = await fetch('http://localhost:3001/glpi-chamados/chamados');
+        const dados = await res.json();
+        document.getElementById('totalAtual').textContent = dados.length; // <- aqui estava o erro
+      } catch (err) {
+        console.error("Erro ao buscar chamados:", err);
+      }
+    }
+  
+    window.addEventListener("DOMContentLoaded", () => {
+      atualizarTotal();
+      setInterval(atualizarTotal, 300000); // 5 minutos
+    });
+  </script>
+  
+</body>
+
+</html>

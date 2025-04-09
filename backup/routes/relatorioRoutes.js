@@ -10,12 +10,7 @@ const {
   gerarPlanilhaPorPeriodo,
   carregarHistoricoMensal
 } = require("../services/excelService");
-
 const { registrarSnapshotDiario } = require("../services/snapshotService");
-
-const { registrarDiaChamados } = require("../services/diasService");
-
-const { logToFile } = require("../utils/logger");
 
 const router = express.Router();
 
@@ -108,34 +103,16 @@ router.get("/exportar-relatorio-periodo", async (req, res) => {
   }
 });
 
-
+// Rota de forçar snapshot manual (teste)
 router.get("/forcar-snapshot-hoje", async (req, res) => {
-  let snapshotOk = false;
-  let diasOk = false;
-
   try {
     await registrarSnapshotDiario();
-    snapshotOk = true;
+    res.send("✅ Snapshot forçado com sucesso.");
   } catch (err) {
-    logToFile(`❌ Erro no registrarSnapshotDiario: ${err.message}`);
-  }
-
-  try {
-    await registrarDiaChamados();
-    diasOk = true;
-  } catch (err) {
-    logToFile(`❌ Erro no registrarDiaChamados: ${err.message}`);
-  }
-
-  if (snapshotOk || diasOk) {
-    res.send(`🟢 Resultados: Snapshot: ${snapshotOk ? "✅ OK" : "❌ Falhou"}, Dias: ${diasOk ? "✅ OK" : "❌ Falhou"}`);
-  } else {
-    res.status(500).send("❌ Ambos os registros falharam.");
+    console.error("Erro ao forçar snapshot:", err.message);
+    res.status(500).send("Erro ao forçar snapshot.");
   }
 });
-
-
-
 const fs = require("fs");
 const ExcelJS = require("exceljs");
 

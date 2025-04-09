@@ -1,19 +1,18 @@
 const fs = require("fs");
 const path = require("path");
 
-const pastaLogs = path.join(__dirname, "..", "logs");
+const PASTA_LOGS = path.join(__dirname, "..", "logs");
+const ARQUIVO_LOG = path.join(PASTA_LOGS, "snapshot.log");
 
-if (!fs.existsSync(pastaLogs)) {
-  fs.mkdirSync(pastaLogs);
+if (!fs.existsSync(PASTA_LOGS)) {
+  fs.mkdirSync(PASTA_LOGS);
 }
 
-function escreverLog(msg) {
-  const agora = new Date();
-  const dataHora = agora.toISOString().replace("T", " ").substring(0, 16);
-  const [ano, mes] = agora.toISOString().split("T")[0].split("-");
-  const arquivo = path.join(pastaLogs, `log-${ano}-${mes}.txt`);
-  const linha = `[${dataHora}] ${msg}\n`;
-  fs.appendFileSync(arquivo, linha, "utf8");
+function logToFile(mensagem) {
+  const agora = new Date().toISOString();
+  const linha = `[${agora}] ${mensagem}\n`;
+  fs.appendFileSync(ARQUIVO_LOG, linha);
+  console.log("📌 LOG:", mensagem);
 }
 
-module.exports = { escreverLog };
+module.exports = { logToFile };

@@ -2,7 +2,6 @@ const path = require("path");
 const fs = require("fs");
 const ExcelJS = require("exceljs");
 const { obterTodosChamados } = require("./glpiService");
-const { logToFile } = require("../utils/logger");
 
 const PASTA_RELATORIOS = path.join(__dirname, "..", "relatorios");
 
@@ -23,24 +22,14 @@ async function registrarDiaChamados() {
     const caminho = path.join(PASTA_RELATORIOS, nomeArquivo);
     const caminhoJson = path.join(PASTA_RELATORIOS, `dias-salvos-${ano}-${mes}.json`);
 
-    const workbook = new ExcelJS.Workbook();
-
-    let sheet;
+    let workbook, sheet;
 
     if (fs.existsSync(caminho)) {
+      workbook = new ExcelJS.Workbook();
       await workbook.xlsx.readFile(caminho);
       sheet = workbook.getWorksheet("Dias");
-
-      // se por algum motivo não existir, recria
-      if (!sheet) {
-        sheet = workbook.addWorksheet("Dias");
-        sheet.columns = [
-          { header: "Data", key: "data", width: 15 },
-          { header: "Total de Chamados", key: "total", width: 25 },
-          { header: "Acima da Meta", key: "acimaMeta", width: 20 },
-        ];
-      }
     } else {
+      workbook = new ExcelJS.Workbook();
       sheet = workbook.addWorksheet("Dias");
       sheet.columns = [
         { header: "Data", key: "data", width: 15 },
@@ -49,14 +38,7 @@ async function registrarDiaChamados() {
       ];
     }
 
-    // Verifica se o dia já está registrado
-    let jaExiste = false;
-    sheet.eachRow((row, idx) => {
-      if (idx === 1) return;
-      const valor = row.getCell(1).text;
-      if (valor === hoje) jaExiste = true;
-    });
-
+    const jaExiste = sheet.getRows(2, sheet.rowCount).some(row => row.getCell(1).value === hoje);
     if (!jaExiste) {
       sheet.addRow({
         data: hoje,
@@ -66,40 +48,36 @@ async function registrarDiaChamados() {
       console.log(`🗓️ Dia ${hoje} registrado com ${abertos.length} chamados.`);
     }
 
-    // Remove linha de média antiga se existir
-    const rows = sheet.getRows(2, sheet.rowCount - 1) || [];
-    const linhasValidas = rows.filter(row => row.getCell(1).value !== "Média");
-
     const totais = [];
-    for (const row of linhasValidas) {
-      const data = row.getCell(1).value;
-      const total = Number(row.getCell(2).value);
-      if (data && !isNaN(total)) {
-        totais.push({ data, total });
-      }
-    }
-
-    const media = Math.round(totais.reduce((acc, curr) => acc + curr.total, 0) / totais.length || 0);
-
-    // Remove "Média" existente, se houver
     sheet.eachRow((row, idx) => {
-      if (row.getCell(1).value === "Média") {
-        sheet.spliceRows(idx, 1);
+      if (idx === 1) return;
+      const data = row.getCell(1).value;
+      const total = row.getCell(2).value;
+      if (data !== "Média" && typeof total === "number") {
+        totais.push({ data, total });
       }
     });
 
-    sheet.addRow({ data: "Média", total: media });
+    const media = Math.round(
+      totais.reduce((acc, curr) => acc + curr.total, 0) / totais.length
+    );
 
+    const ultimaLinha = sheet.lastRow;
+    if (ultimaLinha.getCell(1).value === "Média") {
+      ultimaLinha.getCell(2).value = media;
+    } else {
+      sheet.addRow({ data: "Média", total: media });
+    }
+
+    // Salvar Excel e JSON
     await workbook.xlsx.writeFile(caminho);
     fs.writeFileSync(caminhoJson, JSON.stringify({ media, dias: totais }));
 
-    console.log(`✅ Registro das 18h atualizado: ${hoje}`);
-    logToFile(`✅ Registro de dia concluído com ${abertos.length} chamados em ${hoje}`);
+    console.log(`✅ Registro das 18h simulado em ${new Date().toISOString()}`);
+
   } catch (err) {
-    logToFile(`❌ Erro ao registrar dia: ${err.stack || err.message}`);
-    console.error("❌ Erro ao registrar dia:", err);
+    console.error("❌ Erro ao registrar dia:", err.message);
   }
 }
-
 
 module.exports = { registrarDiaChamados };

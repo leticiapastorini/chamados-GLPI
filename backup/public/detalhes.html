@@ -3,25 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <title>Chamados Abertos - Detalhes</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>📋 Detalhes dos Chamados</h1>
+    <h1>Chamados Abertos</h1>
 
-    <div class="contadores" id="contadores">
-      <div class="contador">🆕 Novos: <span id="qtd-novos">0</span></div>
-      <div class="contador">📌 Atribuídos: <span id="qtd-atribuidos">0</span></div>
-      <div class="contador">⏳ Pendentes: <span id="qtd-pendentes">0</span></div>
-      <div class="contador total">📊 Total: <span id="qtd-total">0</span></div>
+    <div class="contadores">
+      <span class="contador"><strong>Novos:</strong> <span id="qtd-novos">0</span></span>
+      <span class="contador"><strong>Atribuídos:</strong> <span id="qtd-atribuidos">0</span></span>
+      <span class="contador"><strong>Pendentes:</strong> <span id="qtd-pendentes">0</span></span>
+      <span class="contador total"><strong>Total:</strong> <span id="qtd-total">0</span></span>
     </div>
 
     <div class="acoes">
       <button onclick="baixarTodos()">📥 Baixar Excel Completo</button>
       <button onclick="baixarHoje()">📅 Baixar Excel de Hoje</button>
     </div>
-
-    <canvas id="graficoChamados" width="400" height="150"></canvas>
 
     <table>
       <thead>
@@ -32,7 +30,9 @@
           <th>Data</th>
         </tr>
       </thead>
-      <tbody id="tabela-chamados"></tbody>
+      <tbody id="tabela-chamados">
+        <!-- preenchido via JS -->
+      </tbody>
     </table>
   </div>
 

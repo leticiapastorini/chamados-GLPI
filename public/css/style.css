@@ -1,9 +1,9 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: #ffffff; /* Fundo branco */
+  background-color: #f4f7fb;
   margin: 0;
   padding: 20px;
-  color: #fc0404; /* Texto vermelho */
+  color: #333;
 }
 
 .container {
@@ -12,14 +12,12 @@ body {
   background: #fff;
   padding: 30px;
   border-radius: 10px;
-  border: 2px solid #f8cfcf; /* Vermelho clarinho */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 h1, h2 {
   text-align: center;
   margin-bottom: 20px;
-  color: #fc0404;
 }
 
 .contadores {
@@ -32,7 +30,6 @@ h1, h2 {
 .contador {
   font-size: 18px;
   margin: 5px 10px;
-  color: #fc0404;
 }
 
 .contador.total {
@@ -41,38 +38,18 @@ h1, h2 {
 
 button, .btn-link {
   padding: 10px 20px;
-  background-color: #fc0404; /* Vermelho base */
-  border: 2px solid transparent;
+  background-color: #007bff;
+  border: none;
   color: white;
   border-radius: 5px;
   margin: 5px;
   cursor: pointer;
   font-size: 16px;
   text-decoration: none;
-  transition: all 0.3s ease;
 }
 
 button:hover, .btn-link:hover {
-  background-color: #c90303;
-  box-shadow: 0 0 10px #b9c407; /* Sombra verde ao hover */
-}
-
-.total-grande {
-  font-size: 64px;
-  text-align: center;
-  font-weight: bold;
-  color: #fc0404;
-  margin-top: 40px;
-}
-
-input[type="month"],
-input[type="date"],
-select {
-  padding: 8px;
-  font-size: 16px;
-  margin: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  background-color: #0056b3;
 }
 
 table {
@@ -90,7 +67,25 @@ table th, table td {
 
 table th {
   background-color: #f1f1f1;
-  color: #fc0404;
+}
+
+.status-label {
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+}
+
+.status-novo {
+  background-color: #28a745;
+}
+
+.status-atrib {
+  background-color: #17a2b8;
+}
+
+.status-pend {
+  background-color: #ffc107;
 }
 
 .alerta-meta {
@@ -102,4 +97,28 @@ table th {
   border-radius: 5px;
   font-weight: bold;
   text-align: center;
+}
+
+input[type="month"], input[type="date"] {
+  padding: 8px;
+  font-size: 16px;
+  margin: 5px;
+}
+
+/* 🔵 Estilo da seção Home */
+.secao-home {
+  text-align: center;
+  padding-top: 40px;
+}
+
+.total-grande {
+  font-size: 5rem;
+  color: #004080;
+  margin-top: 20px;
+  font-weight: bold;
+  background-color: #e0f0ff;
+  padding: 40px;
+  display: inline-block;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
