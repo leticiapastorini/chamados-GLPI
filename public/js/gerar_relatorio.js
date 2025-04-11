@@ -1,7 +1,8 @@
+// gerar_relatorio.js  –  tudo com caminhos relativos
+
 async function carregarChamados() {
   try {
-    const res = await fetch("http://localhost:3001/glpi-chamados/chamados");
-
+    const res = await fetch("/glpi-chamados/chamados");
     if (!res.ok) throw new Error(`Erro ao buscar chamados: ${res.statusText}`);
 
     const chamados = await res.json();
@@ -35,19 +36,28 @@ function atualizarTabela(chamados) {
     tabela.appendChild(linha);
   });
 
-  document.getElementById("qtd-novos").textContent = qtdNovo;
+  document.getElementById("qtd-novos").textContent      = qtdNovo;
   document.getElementById("qtd-atribuidos").textContent = qtdAtrib;
-  document.getElementById("qtd-pendentes").textContent = qtdPend;
-  document.getElementById("qtd-total").textContent = chamados.length;
+  document.getElementById("qtd-pendentes").textContent  = qtdPend;
+  document.getElementById("qtd-total").textContent      = chamados.length;
+
+  // gráfico
+  if (typeof desenharGraficoChamados === "function") {
+    desenharGraficoChamados([
+      { data: "Novos",      total: qtdNovo  },
+      { data: "Atribuídos", total: qtdAtrib },
+      { data: "Pendentes",  total: qtdPend  }
+    ]);
+  }
 }
 
 function baixarTodos() {
-  window.location.href = "http://localhost:3001/glpi-chamados/gerar-relatorio";
+  window.location.href = "/glpi-chamados/gerar-relatorio";
 }
 
 function baixarHoje() {
-  window.location.href = "http://localhost:3001/glpi-chamados/gerar-relatorio-hoje";
+  window.location.href = "/glpi-chamados/gerar-relatorio-hoje";
 }
 
-// Inicializa carregamento ao abrir a página
+// dispara logo que o script é carregado
 carregarChamados();

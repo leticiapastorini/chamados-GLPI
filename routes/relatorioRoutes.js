@@ -1,9 +1,17 @@
 const express = require("express");
-const path = require("path");
+const path    = require("path");
+const fs      = require("fs");
+const ExcelJS = require("exceljs");
+
 const {
   obterChamadosAbertos,
   obterTodosChamados,
 } = require("../services/glpiService");
+
+const { registrarChamadosAbertos18h } = require("../services/snapshot18hService");
+const { registrarDiaChamados }        = require("../services/diasService");
+const { enviarMensagem } = require("../services/notifyService");
+
 const {
   gerarPlanilhaChamados,
   gerarPlanilhaHistorico,
@@ -11,23 +19,24 @@ const {
   carregarHistoricoMensal
 } = require("../services/excelService");
 
-const { registrarSnapshotDiario } = require("../services/snapshotService");
-
-const { registrarDiaChamados } = require("../services/diasService");
-
 const { logToFile } = require("../utils/logger");
 
 const router = express.Router();
 
-// Rota: gerar relatório completo
+/* ----------------------------------------------------------------
+   RELATÓRIOS DE CHAMADOS (excel / json)
+---------------------------------------------------------------- */
+
+// relatório completo
 router.get("/gerar-relatorio", async (req, res) => {
   try {
     const chamados = await obterChamadosAbertos();
-    const workbook = gerarPlanilhaChamados(chamados, "Chamados Abertos");
-
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", "attachment; filename=chamados_abertos.xlsx");
-    await workbook.xlsx.write(res);
+    const wb = gerarPlanilhaChamados(chamados, "Chamados Abertos");
+    res.setHeader("Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition",
+      "attachment; filename=chamados_abertos.xlsx");
+    await wb.xlsx.write(res);
     res.end();
   } catch (err) {
     console.error("Erro ao gerar relatório:", err);
@@ -35,26 +44,27 @@ router.get("/gerar-relatorio", async (req, res) => {
   }
 });
 
-// Rota: gerar relatório apenas dos chamados de hoje
+// relatório somente de hoje
 router.get("/gerar-relatorio-hoje", async (req, res) => {
   try {
     const chamados = await obterChamadosAbertos();
     const hoje = new Date().toISOString().split("T")[0];
-    const chamadosHoje = chamados.filter(c => c.data?.startsWith(hoje));
-
-    const workbook = gerarPlanilhaChamados(chamadosHoje, "Chamados de Hoje");
-
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", "attachment; filename=chamados_hoje.xlsx");
-    await workbook.xlsx.write(res);
+    const hojeLista = chamados.filter(c => c.data?.startsWith(hoje));
+    const wb = gerarPlanilhaChamados(hojeLista, "Chamados de Hoje");
+    res.setHeader("Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition",
+      "attachment; filename=chamados_hoje.xlsx");
+    await wb.xlsx.write(res);
     res.end();
   } catch (err) {
-    console.error("Erro ao gerar relatório de hoje:", err);
+    console.error("Erro relatório hoje:", err);
     res.status(500).json({ erro: "Erro ao gerar relatório de hoje" });
   }
 });
 
-// Rota: exportar histórico mensal
+/* ---------- HISTÓRICO MENSAL ---------- */
+
 router.get("/historico-json", async (req, res) => {
   try {
     const { mes } = req.query;
@@ -62,82 +72,83 @@ router.get("/historico-json", async (req, res) => {
     const historico = await carregarHistoricoMensal(mes);
     res.json(historico);
   } catch (err) {
-    console.error("Erro ao carregar histórico:", err.message);
+    console.error("Erro carregar histórico:", err.message);
     res.status(500).send("Erro ao carregar histórico");
   }
 });
 
-// Rota: exportar Excel do histórico mensal
 router.get("/exportar-historico", async (req, res) => {
   try {
     const { mes } = req.query;
     if (!mes) return res.status(400).send("Mês não informado");
     const historico = await carregarHistoricoMensal(mes);
-    const workbook = gerarPlanilhaHistorico(historico, mes);
-
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", `attachment; filename=historico_${mes}.xlsx`);
-    await workbook.xlsx.write(res);
+    const wb = gerarPlanilhaHistorico(historico, mes);
+    res.setHeader("Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition",
+      `attachment; filename=historico_${mes}.xlsx`);
+    await wb.xlsx.write(res);
     res.end();
   } catch (err) {
-    console.error("Erro ao exportar histórico:", err);
+    console.error("Erro exportar histórico:", err);
     res.status(500).send("Erro ao exportar histórico");
   }
 });
 
-// Rota: exportar relatório por período
+/* ---------- RELATÓRIO POR PERÍODO ---------- */
+
 router.get("/exportar-relatorio-periodo", async (req, res) => {
   try {
     const { de, ate } = req.query;
-    if (!de || !ate) return res.status(400).send("Parâmetros 'de' e 'ate' obrigatórios.");
+    if (!de || !ate)
+      return res.status(400).send("Parâmetros 'de' e 'ate' obrigatórios.");
 
     const todos = await obterTodosChamados();
-    const chamadosPeriodo = todos.filter(c =>
-      c.date_creation >= de && c.date_creation <= ate &&
+    const periodo = todos.filter(c =>
+      c.date_creation >= de &&
+      c.date_creation <= ate &&
       [1, 2, 4].includes(Number(c.status))
     );
 
-    const workbook = gerarPlanilhaPorPeriodo(chamadosPeriodo, de, ate);
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", `attachment; filename=chamados_periodo_${de}_a_${ate}.xlsx`);
-    await workbook.xlsx.write(res);
+    const wb = gerarPlanilhaPorPeriodo(periodo, de, ate);
+    res.setHeader("Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition",
+      `attachment; filename=chamados_${de}_a_${ate}.xlsx`);
+    await wb.xlsx.write(res);
     res.end();
   } catch (err) {
-    console.error("Erro ao exportar por período:", err.message);
+    console.error("Erro exportar período:", err.message);
     res.status(500).send("Erro ao exportar por período");
   }
 });
 
-
-router.get("/forcar-snapshot-hoje", async (req, res) => {
-  let snapshotOk = false;
-  let diasOk = false;
+/* ----------------------------------------------------------------
+   FORÇAR REGISTROS (18h + dias‑salvos) – útil para teste manual
+---------------------------------------------------------------- */
+router.get("/forcar-registros", async (req, res) => {
+  let h18 = false, dias = false;
 
   try {
-    await registrarSnapshotDiario();
-    snapshotOk = true;
-  } catch (err) {
-    logToFile(`❌ Erro no registrarSnapshotDiario: ${err.message}`);
+    //await registrarChamadosAbertos18h();
+        const total = await registrarChamadosAbertos18h();
+    await enviarMensagem(`📸 Relatório 18 h\nTotal de chamados abertos: *${total}*`);
+    h18 = true;
+  } catch (e) {
+    logToFile("❌ Erro relatorio‑18h: " + e.message);
   }
 
   try {
     await registrarDiaChamados();
-    diasOk = true;
-  } catch (err) {
-    logToFile(`❌ Erro no registrarDiaChamados: ${err.message}`);
+    dias = true;
+  } catch (e) {
+    logToFile("❌ Erro dias‑salvos: " + e.message);
   }
 
-  if (snapshotOk || diasOk) {
-    res.send(`🟢 Resultados: Snapshot: ${snapshotOk ? "✅ OK" : "❌ Falhou"}, Dias: ${diasOk ? "✅ OK" : "❌ Falhou"}`);
-  } else {
-    res.status(500).send("❌ Ambos os registros falharam.");
-  }
+  res.send(`🟢 18h: ${h18 ? "✅" : "❌"} | Dias: ${dias ? "✅" : "❌"}`);
 });
 
-
-
-const fs = require("fs");
-const ExcelJS = require("exceljs");
+/* ---------- RELATÓRIO 18h JSON / EXCEL ---------- */
 
 router.get("/relatorio-18h-json", async (req, res) => {
   try {
@@ -145,54 +156,54 @@ router.get("/relatorio-18h-json", async (req, res) => {
     if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório.");
 
     const [ano, mesNum] = mes.split("-");
-    const nomeArquivo = `relatorio-18h-${ano}-${mesNum}.xlsx`;
-    const caminho = path.join(__dirname, "..", "relatorios", nomeArquivo);
+    const arquivo = path.join(
+      __dirname, "..", "relatorios", `relatorio-18h-${ano}-${mesNum}.xlsx`
+    );
 
-    if (!fs.existsSync(caminho)) {
-      return res.json([]);
-    }
+    if (!fs.existsSync(arquivo)) return res.json([]);
 
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(caminho);
-    const sheet = workbook.getWorksheet("Chamados18h");
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.readFile(arquivo);
+    const sheet = wb.getWorksheet("Chamados18h");
 
     const dados = [];
     sheet.eachRow((row, i) => {
       if (i === 1 || row.getCell(1).value === "Média") return;
       dados.push({
-        data: row.getCell(1).text,
+        data:  row.getCell(1).text,
         total: row.getCell(3).value
       });
     });
 
     res.json(dados);
   } catch (err) {
-    console.error("Erro ao ler relatorio 18h:", err.message);
+    console.error("Erro ler 18h:", err.message);
     res.status(500).send("Erro ao buscar relatorio 18h");
   }
 });
 
 router.get("/exportar-18h", async (req, res) => {
-    try {
-      const { mes } = req.query;
-      if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório.");
-  
-      const [ano, mesNum] = mes.split("-");
-      const nomeArquivo = `relatorio-18h-${ano}-${mesNum}.xlsx`;
-      const caminho = path.join(__dirname, "..", "relatorios", nomeArquivo);
-  
-      if (!fs.existsSync(caminho)) {
-        return res.status(404).send("Relatório não encontrado.");
-      }
-  
-      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-      res.setHeader("Content-Disposition", `attachment; filename=${nomeArquivo}`);
-      fs.createReadStream(caminho).pipe(res);
-    } catch (err) {
-      console.error("Erro ao exportar Excel 18h:", err.message);
-      res.status(500).send("Erro ao exportar Excel 18h");
-    }
-  });
-  
+  try {
+    const { mes } = req.query;
+    if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório.");
+
+    const [ano, mesNum] = mes.split("-");
+    const arquivo = path.join(
+      __dirname, "..", "relatorios", `relatorio-18h-${ano}-${mesNum}.xlsx`
+    );
+
+    if (!fs.existsSync(arquivo))
+      return res.status(404).send("Relatório não encontrado.");
+
+    res.setHeader("Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition",
+      `attachment; filename=relatorio-18h-${ano}-${mesNum}.xlsx`);
+    fs.createReadStream(arquivo).pipe(res);
+  } catch (err) {
+    console.error("Erro exportar 18h:", err.message);
+    res.status(500).send("Erro ao exportar Excel 18h");
+  }
+});
 
 module.exports = router;

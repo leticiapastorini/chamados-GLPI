@@ -11,7 +11,7 @@
     if (totalDiv) {
       totalDiv.textContent = total;
     } else {
-      console.error("Elemento #totalChamados não encontrado!");
+      return;
     }
   } catch (error) {
     console.error("Erro ao buscar chamados:", error);

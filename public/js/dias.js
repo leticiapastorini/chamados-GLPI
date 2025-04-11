@@ -1,3 +1,5 @@
+// dias.js FINALIZADO ✅
+
 async function carregarDias() {
   const mes = document.getElementById("mesFiltro").value;
   const filtro = document.getElementById("filtroQuantidade").value;
@@ -24,20 +26,18 @@ async function carregarDias() {
       })
       .forEach(d => {
         const tr = document.createElement("tr");
-
         const acimaMeta = d.total > 50 ? "SIM" : "-";
 
         if (d.total > 50) {
           tr.style.backgroundColor = "#ffe0e0";
           tr.style.color = "#8b0000";
         }
-        tr.innerHTML = `
-        <td>${d.data}</td>
-        <td>${d.total}</td>
-        <td>${d.total > 50 ? "SIM" : "-"}</td>
-      `;
-      
 
+        tr.innerHTML = `
+          <td>${d.data}</td>
+          <td>${d.total}</td>
+          <td>${acimaMeta}</td>
+        `;
         tabela.appendChild(tr);
 
         total += Number(d.total);
@@ -52,15 +52,32 @@ async function carregarDias() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+// ------------------------------------------------------------------
+// Registra listeners tanto em carregamento direto (HTML estático)
+// quanto quando o script é injetado depois que a página já terminou
+// de carregar (modo SPA).
+// ------------------------------------------------------------------
+function inicializarDias() {
   const botaoBuscar = document.getElementById("buscarBtn");
-  if (botaoBuscar) {
+  if (botaoBuscar && !botaoBuscar.dataset.listener) {
     botaoBuscar.addEventListener("click", carregarDias);
+    botaoBuscar.dataset.listener = "on";          // evita registrar 2×
   }
 
-  // Preenche o mês atual no seletor
-  document.getElementById("mesFiltro").value = new Date().toISOString().slice(0, 7);
-});
+  const mesInput = document.getElementById("mesFiltro");
+  if (mesInput && !mesInput.value) {
+    mesInput.value = new Date().toISOString().slice(0, 7);
+  }
+}
+
+// ➜ Caso a página seja carregada como arquivo HTML tradicional
+document.addEventListener("DOMContentLoaded", inicializarDias);
+
+// ➜ Caso o script seja injetado depois que DOMContentLoaded já passou
+if (document.readyState !== "loading") {
+  inicializarDias();
+}
+
 
 async function baixarExcel() {
   const mes = document.getElementById("mesFiltro").value;

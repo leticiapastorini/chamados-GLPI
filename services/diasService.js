@@ -3,6 +3,7 @@ const fs = require("fs");
 const ExcelJS = require("exceljs");
 const { obterTodosChamados } = require("./glpiService");
 const { logToFile } = require("../utils/logger");
+const { enviarMensagem } = require("./notifyService");
 
 const PASTA_RELATORIOS = path.join(__dirname, "..", "relatorios");
 
@@ -27,16 +28,7 @@ async function registrarDiaChamados() {
 
     if (fs.existsSync(caminho)) {
       await workbook.xlsx.readFile(caminho);
-      sheet = workbook.getWorksheet("Dias");
-
-      if (!sheet) {
-        sheet = workbook.addWorksheet("Dias");
-        sheet.columns = [
-          { header: "Data", key: "data", width: 15 },
-          { header: "Total de Chamados", key: "total", width: 25 },
-          { header: "Acima da Meta", key: "acimaMeta", width: 20 },
-        ];
-      }
+      sheet = workbook.getWorksheet("Dias") || workbook.addWorksheet("Dias");
     } else {
       sheet = workbook.addWorksheet("Dias");
       sheet.columns = [
@@ -46,12 +38,10 @@ async function registrarDiaChamados() {
       ];
     }
 
-    // Verifica se o dia já está registrado
     let jaExiste = false;
     sheet.eachRow((row, idx) => {
       if (idx === 1) return;
-      const valor = row.getCell(1).text;
-      if (valor === hoje) jaExiste = true;
+      if (row.getCell(1).text === hoje) jaExiste = true;
     });
 
     if (!jaExiste) {
@@ -61,39 +51,37 @@ async function registrarDiaChamados() {
         acimaMeta: abertos.length > 50 ? "SIM" : "-"
       });
       console.log(`🗓️ Dia ${hoje} registrado com ${abertos.length} chamados.`);
+
+      if (abertos.length > 50) {
+        enviarMensagem(`⚠️ ALERTA: Meta diária ultrapassada!\n${abertos.length} chamados registrados hoje.`);
+      }
     }
 
-    // Remove linha de média antiga
     sheet.eachRow((row, idx) => {
-      if (row.getCell(1).value === "Média") {
-        sheet.spliceRows(idx, 1);
-      }
+      if (row.getCell(1).value === "Média") sheet.spliceRows(idx, 1);
     });
 
-    // Reconstroi totais com Acima da Meta
     const totais = [];
     sheet.eachRow((row, idx) => {
       if (idx === 1) return;
       const data = row.getCell(1).value;
       const total = Number(row.getCell(2).value);
-      const acimaMeta = row.getCell(3).value;
       if (data && typeof total === "number") {
-        totais.push({ data, total, acimaMeta: total > 50 ? "SIM" : "-" });
+        totais.push({ data, total });
       }
     });
 
-    const media = Math.round(totais.reduce((acc, curr) => acc + curr.total, 0) / totais.length || 0);
-
+    const media = Math.round(totais.reduce((acc, curr) => acc + curr.total, 0) / totais.length);
     sheet.addRow({ data: "Média", total: media });
 
     await workbook.xlsx.writeFile(caminho);
     fs.writeFileSync(caminhoJson, JSON.stringify({ media, dias: totais }));
 
-    console.log(`✅ Registro das 18h atualizado: ${hoje}`);
-    logToFile(`✅ Registro de dia concluído com ${abertos.length} chamados em ${hoje}`);
+    logToFile(`✅ Registro diário concluído: ${abertos.length} chamados (${hoje})`);
   } catch (err) {
     logToFile(`❌ Erro ao registrar dia: ${err.stack || err.message}`);
     console.error("❌ Erro ao registrar dia:", err);
+    enviarMensagem(`❌ Erro ao registrar dia: ${err.message}`);
   }
 }
 

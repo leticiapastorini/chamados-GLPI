@@ -1,12 +1,14 @@
+// diasRoutes.js FINALIZADO ✅
+
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const ExcelJS = require("exceljs");
 
 const router = express.Router();
-
 const PASTA_RELATORIOS = path.join(__dirname, "..", "relatorios");
 
+// Rota: Retorna os dados JSON para a tela Dias
 router.get("/dias-json", (req, res) => {
   const { mes } = req.query;
   if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório");
@@ -20,8 +22,7 @@ router.get("/dias-json", (req, res) => {
   res.json(dados);
 });
 
-
-// ✅ Rota correta para baixar o Excel já salvo automaticamente
+// Rota: Exporta o arquivo Excel do mês selecionado
 router.get("/exportar-dias", async (req, res) => {
   try {
     const { mes } = req.query;

@@ -1,10 +1,17 @@
+// app.js  –  SPA com History API e detecção de rota inicial
+
 const rotas = {
   home: "/views/home.html",
   detalhes: "/views/detalhes.html",
-  dias: "/views/dias.html"
+  dias: "/views/dias.html",
+  rel18h:  "/views/18h.html"
 };
 
-async function navegar(pagina) {
+// ↔  ligação entre página e URL “bonita”
+const pathPorPagina = { home: "/", detalhes: "/detalhes", dias: "/dias" };
+const paginaPorPath = { "/": "home", "/detalhes": "detalhes", "/dias": "dias" };
+
+async function navegar(pagina, push = true) {
   const caminho = rotas[pagina];
   const conteudo = document.getElementById("conteudo");
 
@@ -15,6 +22,9 @@ async function navegar(pagina) {
     const html = await res.text();
     conteudo.innerHTML = html;
     carregarScripts(pagina);
+
+    // Atualiza URL sem recarregar
+    if (push) history.pushState({ pagina }, "", pathPorPagina[pagina]);
   } catch (err) {
     conteudo.innerHTML = `<p>Erro ao carregar a página: ${pagina}</p>`;
     console.error(err);
@@ -23,20 +33,33 @@ async function navegar(pagina) {
 
 function carregarScripts(pagina) {
   const scripts = {
-    home: ["/js/home.js"],
-    detalhes: ["/js/gerar_relatorio.js", "/js/charts.js"],
-    dias: ["/js/dias.js"]
-  };
+        home: ["/js/home.js"],
+        detalhes: [
+          "https://cdn.jsdelivr.net/npm/chart.js",   // 1º – biblioteca
+          "/js/charts.js",                           // 2º – helpers
+          "/js/gerar_relatorio.js"                   // 3º – busca & monta gráfico
+        ],
+        dias: ["/js/dias.js"],
+        rel18h:  ["/js/relatorio18h.js"]
+      };
 
-  const lista = scripts[pagina] || [];
-  lista.forEach(src => {
-    const script = document.createElement("script");
-    script.src = src;
-    script.defer = true;
-    document.body.appendChild(script);
+  (scripts[pagina] || []).forEach(src => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.defer = true;
+    document.body.appendChild(s);
   });
 }
 
+// ---------- inicialização ----------
 window.addEventListener("DOMContentLoaded", () => {
-  navegar("home");
+  // Abre a página correspondente à URL atual
+  const paginaInicial = paginaPorPath[window.location.pathname] || "home";
+  navegar(paginaInicial, false);
+});
+
+// Voltar/avançar do navegador
+window.addEventListener("popstate", e => {
+  const pagina = e.state?.pagina || paginaPorPath[window.location.pathname] || "home";
+  navegar(pagina, false);
 });

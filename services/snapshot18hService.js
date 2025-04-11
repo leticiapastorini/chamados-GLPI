@@ -2,7 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const ExcelJS = require("exceljs");
 const { obterChamadosAbertos } = require("./glpiService");
-const { escreverLog } = require("../utils/logger");
+const { logToFile } = require("../utils/logger");
+const { enviarMensagem } = require("./notifyService");
 
 async function registrarChamadosAbertos18h() {
   try {
@@ -22,8 +23,18 @@ async function registrarChamadosAbertos18h() {
       workbook = new ExcelJS.Workbook();
     }
 
-    const sheet = workbook.getWorksheet("18h") || workbook.addWorksheet("18h");
-
+    const sheet = workbook.getWorksheet("Chamados18h") || workbook.addWorksheet("Chamados18h");
+    
+    // ── cabeçalho (só se a planilha acabou de ser criada) ─────────────
+    if (sheet.columnCount === 0) {
+        sheet.columns = [
+          { header: "Data",  key: "data",  width: 15 },
+          { header: "Hora",  key: "hora",  width: 8  },
+          { header: "Total", key: "total", width: 10 }
+        ];
+      }
+    // ───────────────────────────────────────────────────────────────────
+  
     // Remover linha "Média" existente
     sheet.eachRow((row, idx) => {
       if (row.getCell(1).value === "Média") {
@@ -60,12 +71,24 @@ async function registrarChamadosAbertos18h() {
 
     await workbook.xlsx.writeFile(arquivo);
 
-    escreverLog(`Snapshot das 18h salvo com ${chamados.length} chamados`);
+    logToFile(`Snapshot das 18h salvo com ${chamados.length} chamados`);
     console.log(`📸 Snapshot diário salvo: ${data} - ${chamados.length} chamados`);
+
+    // Enviar mensagem no WhatsApp
+    enviarMensagem(`Relatorio 18h ${data}: ${chamados.length} chamados abertos`);
+
+    return chamados.length;
+
   } catch (err) {
     console.error("Erro ao registrar snapshot das 18h:", err);
-    escreverLog("❌ Erro ao salvar snapshot das 18h: " + err.message);
+    logToFile("❌ Erro ao salvar snapshot das 18h: " + err.message);
+    
+    if (err.response) {
+      console.error("🔴 Resposta do servidor:", err.response.status, err.response.data);
+    }
   }
+  
 }
+
 
 module.exports = { registrarChamadosAbertos18h };
