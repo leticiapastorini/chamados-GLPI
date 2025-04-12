@@ -41,8 +41,13 @@ async function registrarDiaChamados() {
     let jaExiste = false;
     sheet.eachRow((row, idx) => {
       if (idx === 1) return;
-      if (row.getCell(1).text === hoje) jaExiste = true;
+      const valor = row.getCell(1).value;
+      const valorData = valor instanceof Date
+        ? valor.toISOString().split("T")[0]
+        : String(valor).split("T")[0];
+      if (valorData === hoje) jaExiste = true;
     });
+    
 
     if (!jaExiste) {
       sheet.addRow({

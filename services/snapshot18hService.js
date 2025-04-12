@@ -25,17 +25,17 @@ async function registrarChamadosAbertos18h() {
 
     const sheet = workbook.getWorksheet("Chamados18h") || workbook.addWorksheet("Chamados18h");
     
-    // ── cabeçalho (só se a planilha acabou de ser criada) ─────────────
-    if (sheet.columnCount === 0) {
-        sheet.columns = [
-          { header: "Data",  key: "data",  width: 15 },
-          { header: "Hora",  key: "hora",  width: 8  },
-          { header: "Total", key: "total", width: 10 }
-        ];
-      }
-    // ───────────────────────────────────────────────────────────────────
-  
-    // Remover linha "Média" existente
+     // Cabeçalho (se planilha nova)
+     if (sheet.columnCount === 0) {
+      sheet.columns = [
+        { header: "Data",           key: "data",        width: 15 },
+        { header: "Hora",           key: "hora",        width: 8  },
+        { header: "Total",          key: "total",       width: 10 },
+        { header: "Acima da Meta",  key: "acimaMeta",   width: 20 }
+      ];
+    }
+
+    // Remover linha "Média" antiga
     sheet.eachRow((row, idx) => {
       if (row.getCell(1).value === "Média") {
         sheet.spliceRows(idx, 1);
@@ -46,30 +46,33 @@ async function registrarChamadosAbertos18h() {
     sheet.addRow({
       data,
       hora,
-      total: chamados.length
+      total: chamados.length,
+      acimaMeta: chamados.length > 50 ? "SIM" : "-"
     });
 
-    // Recalcular média após adicionar o novo dia
-    const dados = [];
+    // Atualizar campo "Acima da Meta" para todos os dias
+    const totais = [];
     sheet.eachRow((row, idx) => {
+      if (idx === 1) return; // ignorar cabeçalho
       const val = row.getCell(1).value;
-      if (val !== "Data" && val !== "Média" && val instanceof Date === false) {
-        dados.push({
-          data: row.getCell(1).value,
-          hora: row.getCell(2).value,
-          total: parseInt(row.getCell(3).value || 0)
-        });
+      if (val !== "Média") {
+        const total = parseInt(row.getCell(3).value || 0);
+        if (!isNaN(total)) {
+          row.getCell(4).value = total > 50 ? "SIM" : "-";
+          totais.push(total);
+        }
       }
     });
 
-    if (dados.length > 0) {
-      const media = Math.round(
-        dados.reduce((acc, item) => acc + (item.total || 0), 0) / dados.length
-      );
+    // Adicionar linha "Média" final
+    if (totais.length > 0) {
+      const media = Math.round(totais.reduce((a, b) => a + b, 0) / totais.length);
       sheet.addRow({ data: "Média", hora: "", total: media });
     }
 
+
     await workbook.xlsx.writeFile(arquivo);
+
 
     logToFile(`Snapshot das 18h salvo com ${chamados.length} chamados`);
     console.log(`📸 Snapshot diário salvo: ${data} - ${chamados.length} chamados`);
