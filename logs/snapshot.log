@@ -107,3 +107,77 @@
 [2025-04-11T18:53:18.500Z] ✅ Registro diário concluído: 29 chamados (2025-04-11)
 [2025-04-11T18:56:03.974Z] Snapshot das 18h salvo com 29 chamados
 [2025-04-11T18:56:38.918Z] ✅ Registro diário concluído: 29 chamados (2025-04-11)
+[2025-04-12T16:58:28.288Z] Snapshot das 18h salvo com 25 chamados
+[2025-04-12T16:59:10.027Z] ✅ Registro diário concluído: 25 chamados (2025-04-12)
+[2025-04-12T17:00:37.601Z] ✅ Registro diário concluído: 25 chamados (2025-04-12)
+[2025-04-12T17:00:37.604Z] ✅ dias‑salvos atualizado
+[2025-04-12T17:31:31.916Z] Snapshot das 18h salvo com 25 chamados
+[2025-04-12T17:32:08.176Z] ✅ Registro diário concluído: 25 chamados (2025-04-12)
+[2025-04-12T18:05:50.252Z] Snapshot das 18h salvo com 25 chamados
+[2025-04-12T18:06:52.227Z] ✅ Registro diário concluído: 25 chamados (2025-04-12)
+[2025-04-12T18:09:23.799Z] Snapshot das 18h salvo com 25 chamados
+[2025-04-12T18:10:00.010Z] ✅ Registro diário concluído: 25 chamados (2025-04-12)
+[2025-04-12T18:12:53.433Z] Snapshot das 18h salvo com 25 chamados
+[2025-04-12T18:13:32.029Z] ✅ Registro diário concluído: 25 chamados (2025-04-12)
+[2025-04-12T18:22:14.816Z] Snapshot das 18h salvo com 24 chamados
+[2025-04-12T18:22:17.539Z] Snapshot das 18h salvo com 24 chamados
+[2025-04-12T18:22:54.593Z] ✅ Registro diário concluído: 24 chamados (2025-04-12)
+[2025-04-12T18:23:00.181Z] ✅ Registro diário concluído: 24 chamados (2025-04-12)
+[2025-04-12T18:30:25.732Z] Snapshot das 18h salvo com 24 chamados
+[2025-04-12T18:31:03.665Z] ✅ Registro diário concluído: 24 chamados (2025-04-12)
+[2025-04-12T18:35:40.250Z] Snapshot das 18h salvo com 24 chamados
+[2025-04-12T18:36:16.900Z] ❌ Erro ao registrar dia: Error: EBUSY: resource busy or locked, open 'C:\Users\leticia.pastorini\Documents\GitHub\chamados-GLPI\relatorios\dias-salvos-2025-04.xlsx'
+[2025-04-12T19:00:35.378Z] ✅ Registro diário concluído: 24 chamados (2025-04-12)
+[2025-04-12T19:00:35.382Z] ✅ dias‑salvos atualizado
+[2025-04-12T21:00:35.961Z] ✅ Registro diário concluído: 26 chamados (2025-04-12)
+[2025-04-12T21:00:35.964Z] ✅ dias‑salvos atualizado
+[2025-04-12T21:00:36.190Z] Snapshot das 18h salvo com 26 chamados
+[2025-04-12T21:00:36.192Z] ✅ Relatorio‑18h salvo (26 chamados)
+[2025-04-12T23:00:34.047Z] ✅ Registro diário concluído: 26 chamados (2025-04-12)
+[2025-04-12T23:00:34.051Z] ✅ dias‑salvos atualizado
+[2025-04-13T01:00:33.059Z] ✅ Registro diário concluído: 25 chamados (2025-04-13)
+[2025-04-13T01:00:33.062Z] ✅ dias‑salvos atualizado
+[2025-04-13T03:00:33.989Z] ✅ Registro diário concluído: 25 chamados (2025-04-13)
+[2025-04-13T03:00:33.995Z] ✅ dias‑salvos atualizado
+[2025-04-13T05:00:32.707Z] ✅ Registro diário concluído: 25 chamados (2025-04-13)
+[2025-04-13T05:00:32.711Z] ✅ dias‑salvos atualizado
+[2025-04-13T07:00:32.564Z] ✅ Registro diário concluído: 25 chamados (2025-04-13)
+[2025-04-13T07:00:32.568Z] ✅ dias‑salvos atualizado
+[2025-04-13T09:00:32.758Z] ✅ Registro diário concluído: 25 chamados (2025-04-13)
+[2025-04-13T09:00:32.761Z] ✅ dias‑salvos atualizado
+[2025-04-13T11:00:33.526Z] ✅ Registro diário concluído: 25 chamados (2025-04-13)
+[2025-04-13T11:00:33.530Z] ✅ dias‑salvos atualizado
+[2025-04-13T13:00:33.414Z] ✅ Registro diário concluído: 26 chamados (2025-04-13)
+[2025-04-13T13:00:33.417Z] ✅ dias‑salvos atualizado
+[2025-04-13T15:00:33.045Z] ✅ Registro diário concluído: 27 chamados (2025-04-13)
+[2025-04-13T15:00:33.050Z] ✅ dias‑salvos atualizado
+[2025-04-13T17:00:33.520Z] ✅ Registro diário concluído: 28 chamados (2025-04-13)
+[2025-04-13T17:00:33.525Z] ✅ dias‑salvos atualizado
+[2025-04-13T19:00:33.223Z] ✅ Registro diário concluído: 28 chamados (2025-04-13)
+[2025-04-13T19:00:33.227Z] ✅ dias‑salvos atualizado
+[2025-04-13T21:00:35.086Z] ✅ Registro diário concluído: 27 chamados (2025-04-13)
+[2025-04-13T21:00:35.091Z] ✅ dias‑salvos atualizado
+[2025-04-13T21:00:35.422Z] Snapshot das 18h salvo com 27 chamados
+[2025-04-13T21:00:35.424Z] ✅ Relatorio‑18h salvo (27 chamados)
+[2025-04-13T23:00:33.059Z] ✅ Registro diário concluído: 27 chamados (2025-04-13)
+[2025-04-13T23:00:33.064Z] ✅ dias‑salvos atualizado
+[2025-04-14T01:00:34.281Z] ✅ Registro diário concluído: 27 chamados (2025-04-14)
+[2025-04-14T01:00:34.288Z] ✅ dias‑salvos atualizado
+[2025-04-14T03:00:33.485Z] ✅ Registro diário concluído: 27 chamados (2025-04-14)
+[2025-04-14T03:00:33.491Z] ✅ dias‑salvos atualizado
+[2025-04-14T05:00:35.023Z] ✅ Registro diário concluído: 27 chamados (2025-04-14)
+[2025-04-14T05:00:35.028Z] ✅ dias‑salvos atualizado
+[2025-04-14T07:00:32.563Z] ✅ Registro diário concluído: 27 chamados (2025-04-14)
+[2025-04-14T07:00:32.567Z] ✅ dias‑salvos atualizado
+[2025-04-14T09:00:34.623Z] ✅ Registro diário concluído: 27 chamados (2025-04-14)
+[2025-04-14T09:00:34.625Z] ✅ dias‑salvos atualizado
+[2025-04-14T11:00:35.770Z] ✅ Registro diário concluído: 30 chamados (2025-04-14)
+[2025-04-14T11:00:35.773Z] ✅ dias‑salvos atualizado
+[2025-04-14T11:58:51.026Z] Snapshot das 18h salvo com 30 chamados
+[2025-04-14T11:59:27.673Z] ✅ Registro diário concluído: 30 chamados (2025-04-14)
+[2025-04-14T13:00:37.850Z] ✅ Registro diário concluído: 34 chamados (2025-04-14)
+[2025-04-14T13:00:37.854Z] ✅ dias‑salvos atualizado
+[2025-04-14T13:03:24.357Z] Snapshot das 18h salvo com 36 chamados
+[2025-04-14T15:00:01.007Z] ❌ Erro na busca de chamados às 12h: registrarChamadosAbertos12h is not defined
+[2025-04-14T21:00:35.288Z] Snapshot das 18h salvo com 36 chamados
+[2025-04-14T21:00:35.294Z] ✅ Chamados às 18h: 36 chamados (sobrescrito)

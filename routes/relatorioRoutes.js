@@ -168,12 +168,19 @@ router.get("/relatorio-18h-json", async (req, res) => {
 
     const dados = [];
     sheet.eachRow((row, i) => {
-      if (i === 1 || row.getCell(1).value === "Média") return;
+      const valor = row.getCell(1).value;
+      const dataTexto = valor instanceof Date
+        ? valor.toISOString().split("T")[0]
+        : String(valor).split("T")[0];
+    
+      if (i === 1 || dataTexto === "Média") return;
+    
       dados.push({
-        data:  row.getCell(1).text,
+        data:  dataTexto,
         total: row.getCell(3).value
       });
     });
+    
 
     res.json(dados);
   } catch (err) {
@@ -205,5 +212,45 @@ router.get("/exportar-18h", async (req, res) => {
     res.status(500).send("Erro ao exportar Excel 18h");
   }
 });
+
+
+// ROTAS MOVIDAS DE diasRoutes.js
+
+// JSON de dias
+router.get("/dias-json", (req, res) => {
+  const { mes } = req.query;
+  if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório");
+
+  const [ano, mesNum] = mes.split("-");
+  const caminhoJson = path.join(__dirname, "..", "relatorios", `dias-salvos-${ano}-${mesNum}.json`);
+
+  if (!fs.existsSync(caminhoJson)) return res.json({ media: 0, dias: [] });
+
+  const dados = JSON.parse(fs.readFileSync(caminhoJson));
+  res.json(dados);
+});
+
+// Excel de dias
+router.get("/exportar-dias", async (req, res) => {
+  try {
+    const { mes } = req.query;
+    if (!mes) return res.status(400).send("Parâmetro 'mes' obrigatório");
+
+    const [ano, mesNum] = mes.split("-");
+    const nomeArquivo = `dias-salvos-${ano}-${mesNum}.xlsx`;
+    const caminho = path.join(__dirname, "..", "relatorios", nomeArquivo);
+
+    if (!fs.existsSync(caminho)) return res.status(404).send("Arquivo não encontrado.");
+
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename=${nomeArquivo}`);
+
+    fs.createReadStream(caminho).pipe(res);
+  } catch (err) {
+    console.error("❌ Erro ao exportar dias:", err.message);
+    res.status(500).send("Erro ao exportar Excel");
+  }
+});
+
 
 module.exports = router;

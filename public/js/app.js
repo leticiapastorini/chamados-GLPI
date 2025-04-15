@@ -8,8 +8,8 @@ const rotas = {
 };
 
 // ↔  ligação entre página e URL “bonita”
-const pathPorPagina = { home: "/", detalhes: "/detalhes", dias: "/dias" };
-const paginaPorPath = { "/": "home", "/detalhes": "detalhes", "/dias": "dias" };
+const pathPorPagina = { home: "/", detalhes: "/detalhes", dias: "/dias", rel18h: "/18h"};
+const paginaPorPath = { "/": "home", "/detalhes": "detalhes", "/dias": "dias" , "/18h": "18h"};
 
 async function navegar(pagina, push = true) {
   const caminho = rotas[pagina];

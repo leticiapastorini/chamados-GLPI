@@ -1,4 +1,3 @@
-// server.js – somente relatorio‑18h diário e dias‑salvos de 2h em 2h
 
 require("dotenv").config();
 console.log("API URL de Desenvolvimento:", process.env.API_URL_DEV);
@@ -20,7 +19,6 @@ const { enviarMensagem }              = require("./services/notifyService");
 
 const chamadosRoutes  = require("./routes/chamadosRoutes");
 const relatorioRoutes = require("./routes/relatorioRoutes");
-const diasRoutes      = require("./routes/diasRoutes");
 
 const app = express();
 app.use(cors());
@@ -29,7 +27,6 @@ app.use(express.json());
 // rotas de API
 app.use("/glpi-chamados", chamadosRoutes);
 app.use("/glpi-chamados", relatorioRoutes);
-app.use("/glpi-chamados", diasRoutes);
 
 // arquivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
@@ -42,58 +39,38 @@ const sendIndex = (req, res) =>
 app.get("/",        sendIndex);
 app.get("/detalhes",sendIndex);
 app.get("/dias",    sendIndex);
-app.get("/18h",    sendIndex);     // 🔧 nova tela
 // ----------------------------------
 
 // ────────────────────────────────────────────────────────────────
-// server.js  –  trecho do cron 18 h
-cron.schedule("0 21 * * *", async () => {
- // cron.schedule("* * * * *", async () => {
-  console.log("⏰ 18h – gerando relatorio‑18h...");
-  const agora = new Date().toLocaleString();
+// server.js  –  tarefa cron 12h e 18h
+cron.schedule("0 12 * * *", async () => {
+  console.log("⏰ Executando busca de chamados às 12h...");
   try {
-    // totalHoje vem do return da função
-    const totalHoje = await registrarChamadosAbertos18h();
-
-    enviarMensagem(`📸 Relatório 18h (${agora})\nTotal de chamados abertos: *${totalHoje}*`);
-    logToFile(`✅ Relatorio‑18h salvo (${totalHoje} chamados)`);
-
- 
+    const total12h = await registrarChamadosAbertos12h(); // função para 12h
+    enviarMensagem(`📅 Relatório de Chamados às 12h: ${total12h} chamados registrados.`);
+    logToFile(`✅ Chamados às 12h: ${total12h} chamados`);
   } catch (e) {
-    console.error("❌ erro relatorio‑18h:", e.message);
-    logToFile("❌ erro relatorio‑18h: " + e.message);
+    console.error("❌ Erro na busca de chamados às 12h:", e.message);
+    logToFile("❌ Erro na busca de chamados às 12h: " + e.message);
   }
-}, { timezone: "UTC" });
+}, { timezone: "America/Sao_Paulo" });
+
+// 18h - Buscar e sobrescrever com os dados de 18h
+cron.schedule("0 18 * * *", async () => {
+  console.log("⏰ Executando busca de chamados às 18h...");
+  try {
+    const total18h = await registrarChamadosAbertos18h(); // função para 18h
+    enviarMensagem(`📸 Relatório 18h: ${total18h} chamados registrados.`);
+    logToFile(`✅ Chamados às 18h: ${total18h} chamados (sobrescrito)`);
+  } catch (e) {
+    console.error("❌ Erro na busca de chamados às 18h:", e.message);
+    logToFile("❌ Erro na busca de chamados às 18h: " + e.message);
+  }
+}, { timezone: "America/Sao_Paulo" });
 
 app.get("/teste-msg", (req, res) => {
   enviarMensagem("✅ Teste manual de mensagem via API");
   res.send("Mensagem de teste enviada!");
-});
-
-
-// 2. Dias‑salvos – a cada 2 h em ponto (horário local)
-cron.schedule("0 */2 * * *", async () => {
-  console.log("⏰ Dias‑salvos – execução de 2h em 2h...");
-  try {
-    await registrarDiaChamados();
-    enviarMensagem("✅ Registro dias‑salvos atualizado com sucesso (execução a cada 2h).");
-    logToFile("✅ dias‑salvos atualizado");
-  } catch (e) {
-    console.error("❌ erro dias‑salvos:", e.message);
-    logToFile("❌ erro dias‑salvos: " + e.message);
-  }
-}, { timezone: "America/Sao_Paulo" });
-// ────────────────────────────────────────────────────────────────
-app.get("/glpi-chamados/forcar-snapshot-hoje", async (req, res) => {
-  try {
-    const totalHoje = await registrarChamadosAbertos18h();
-    await registrarDiaChamados();
-
-    res.send(`🟢 Snapshot e registro de dia concluídos. Total: ${totalHoje} chamados.`);
-  } catch (err) {
-    console.error("❌ Erro no forçar-snapshot-hoje:", err.message);
-    res.status(500).send("Erro ao forçar snapshot.");
-  }
 });
 
 // inicia o servidor

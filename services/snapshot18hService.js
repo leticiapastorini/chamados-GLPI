@@ -35,12 +35,13 @@ async function registrarChamadosAbertos18h() {
       ];
     }
 
-    // Remover linha "Média" antiga
     sheet.eachRow((row, idx) => {
-      if (row.getCell(1).value === "Média") {
+      if (row.getCell(1).value === "Média" && idx !== sheet.rowCount) {
         sheet.spliceRows(idx, 1);
+        sheet.addRow({ data: "Média", hora: "", total: media });
       }
     });
+    
 
     // Adicionar linha do dia
     sheet.addRow({
