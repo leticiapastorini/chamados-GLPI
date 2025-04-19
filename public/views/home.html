@@ -1,4 +1,37 @@
-<section class="container">
-  <h1>📊 Total de Chamados Abertos</h1>
-  <div id="totalChamados" class="total-grande">Carregando...</div>
-</section>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Home - Chamados</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- Seção Home -->
+  <section class="container">
+    <div class="card">
+    <h1>📊 Total de Chamados Abertos</h1>
+    <div id="totalChamados" class="total-grande">Carregando...</div>
+  </div>
+    <div style="text-align: center; margin-top: 1rem;">
+      
+    </div>
+  </section>
+
+ 
+
+  <!-- Scripts -->
+  <script src="/js/home.js"></script>
+  <script src="/js/dias.js"></script>
+
+  <!-- Scroll suave -->
+  <script>
+    function scrollToDias() {
+      const section = document.getElementById("dias");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  </script>
+</body>
+</html>

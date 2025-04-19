@@ -1,124 +1,153 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f7fb;
+/* public/css/style.css */
+
+/* 1) Fonte Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* 2) Variáveis */
+:root {
+  --font: 'Inter', sans-serif;
+  --color-bg:    #f8f9fa;
+  --color-card:  #ffffff;
+  --color-text:  #333333;
+  --color-primary: #fc0404;
+  --color-border:  #e0e0e0;
+  --color-muted:   #6c757d;
+  --shadow:        0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* 3) Reset mínimo */
+* {
+  box-sizing: border-box;
   margin: 0;
-  padding: 20px;
-  color: #333;
+  padding: 0;
+}
+body {
+  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
 }
 
+/* 4) Container central */
 .container {
-  max-width: 1000px;
-  margin: auto;
-  background: #fff;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
 }
 
-h1, h2 {
+/* 5) Cards para métricas (Home, etc.) */
+.card {
+  background: var(--color-card);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 2rem;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+}
+.card h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: .5rem;
+  color: var(--color-text);
+}
+.card #totalChamados {
+  font-size: 6rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
 }
 
-.contadores {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
+/* 6) Cabeçalhos */
+h1, h2 {
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.75rem; }
 
-.contador {
-  font-size: 18px;
-  margin: 5px 10px;
-}
-
-.contador.total {
-  font-weight: bold;
-}
-
-button, .btn-link {
-  padding: 10px 20px;
-  background-color: #007bff;
+/* 7) Botões principais */
+button {
+  background: var(--color-primary);
+  color: #fff;
   border: none;
-  color: white;
-  border-radius: 5px;
-  margin: 5px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
-  text-decoration: none;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 0 6px var(--color-primary);
 }
 
-button:hover, .btn-link:hover {
-  background-color: #0056b3;
+/* 8) Inputs e selects */
+input[type="month"],
+select {
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--color-text);
+  margin-right: .5rem;
 }
 
+/* 9) Tabelas tradicionais */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
-  font-size: 15px;
+  margin-top: 1.5rem;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+th, td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+th {
+  background: var(--color-bg);
+  font-weight: 600;
+  color: var(--color-text);
+}
+tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+tbody tr:hover {
+  background: #f0f0f0;
 }
 
-table th, table td {
-  border: 1px solid #ccc;
-  padding: 10px;
-  text-align: left;
-}
-
-table th {
-  background-color: #f1f1f1;
-}
-
-.status-label {
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: white;
-  font-weight: bold;
-}
-
-.status-novo {
-  background-color: #28a745;
-}
-
-.status-atrib {
-  background-color: #17a2b8;
-}
-
-.status-pend {
-  background-color: #ffc107;
-}
-
-.alerta-meta {
-  background-color: #ffdddd;
-  color: #a30000;
-  padding: 10px;
-  margin-top: 20px;
-  border: 1px solid #ffaaaa;
-  border-radius: 5px;
-  font-weight: bold;
+/* 10) Highlight de célula (3ª coluna) */
+td:nth-child(3) {
   text-align: center;
 }
-
-input[type="month"], input[type="date"] {
-  padding: 8px;
-  font-size: 16px;
-  margin: 5px;
-}
-
-/* 🔵 Estilo da seção Home */
-.secao-home {
-  text-align: center;
-  padding-top: 40px;
-}
-
-.total-grande {
-  font-size: 5rem;
-  color: #004080;
-  margin-top: 20px;
+td:nth-child(3).alert {
+  color: var(--color-primary);
   font-weight: bold;
-  background-color: #e0f0ff;
-  padding: 40px;
-  display: inline-block;
-  border-radius: 20px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 11) Texto de média */
+p#mediaDias,
+p#media18h {
+  margin-top: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+/* 12) Responsivo */
+@media (max-width: 768px) {
+  .container { padding: 1rem; }
+  .card { padding: 1.5rem; }
+  h1 { font-size: 1.75rem; }
+  #totalChamados { font-size: 4.5rem; }
+  table, th, td { font-size: 0.95rem; }
+  button { width: 100%; margin-bottom: 1rem; }
 }

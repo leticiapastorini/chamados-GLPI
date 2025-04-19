@@ -2,7 +2,11 @@ const axios = require("axios");
 
 const APP_TOKEN = "vEZzuTcI02kgcKl3UQUgfvd2q3zq2riklGdy2R6x";
 const API_TOKEN = "f1BEzmMm2ZorzxCgpYwlmef5vmdhNM2zu29zdyxv";
-const API_URL = "http://apiperuzzo.corzti.net.br/apirest.php";
+
+const API_URL = process.env.API_URL ||
+  (process.env.NODE_ENV === "production"
+    ? process.env.API_URL_PROD
+    : process.env.API_URL_DEV);
 
 const STATUS_MAP = {
   1: "Novo",
@@ -58,18 +62,26 @@ async function obterTodosChamados(sessionTokenParam = null) {
 
 // Apenas chamados com status abertos
 async function obterChamadosAbertos() {
-  const sessionToken = await obterSessionToken();
-  const chamados = await obterTodosChamados(sessionToken);
+  try {
+    const sessionToken = await obterSessionToken();
+    console.log("✅ Token obtido:", sessionToken);
 
-  return chamados
-    .filter(c => [1, 2, 4].includes(Number(c.status)))
-    .map(c => ({
-      id: c.id,
-      titulo: c.name || "Sem título",
-      status: Number(c.status),
-      status_nome: STATUS_MAP[c.status] || "Desconhecido",
-      data: c.date_creation
-    }));
+    const chamados = await obterTodosChamados(sessionToken);
+    console.log("✅ Total de chamados recebidos:", chamados.length);
+
+    return chamados
+      .filter(c => [1, 2, 4].includes(Number(c.status)))
+      .map(c => ({
+        id: c.id,
+        titulo: c.name || "Sem título",
+        status: Number(c.status),
+        status_nome: STATUS_MAP[c.status] || "Desconhecido",
+        data: c.date_creation
+      }));
+  } catch (err) {
+    console.error("❌ Erro dentro de obterChamadosAbertos:", err);
+    throw err;
+  }
 }
 
 module.exports = {

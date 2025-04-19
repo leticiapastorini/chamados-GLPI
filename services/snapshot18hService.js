@@ -24,9 +24,9 @@ async function registrarChamadosAbertos18h() {
     }
 
     const sheet = workbook.getWorksheet("Chamados18h") || workbook.addWorksheet("Chamados18h");
-    
-     // Cabeçalho (se planilha nova)
-     if (sheet.columnCount === 0) {
+
+    // Cabeçalho (se planilha nova)
+    if (sheet.columnCount === 0) {
       sheet.columns = [
         { header: "Data",           key: "data",        width: 15 },
         { header: "Hora",           key: "hora",        width: 8  },
@@ -35,23 +35,25 @@ async function registrarChamadosAbertos18h() {
       ];
     }
 
-    sheet.eachRow((row, idx) => {
-      if (row.getCell(1).value === "Média" && idx !== sheet.rowCount) {
-        sheet.spliceRows(idx, 1);
-        sheet.addRow({ data: "Média", hora: "", total: media });
+    // Remover linha "Média" antiga, se estiver no meio
+    for (let i = sheet.rowCount; i > 1; i--) {
+      const row = sheet.getRow(i);
+      if (row.getCell(1).value === "Média") {
+        sheet.spliceRows(i, 1);
       }
-    });
-    
+    }
+
+    const totalHoje = chamados.length;
 
     // Adicionar linha do dia
     sheet.addRow({
       data,
       hora,
-      total: chamados.length,
-      acimaMeta: chamados.length > 50 ? "SIM" : "-"
+      total: totalHoje,
+      acimaMeta: totalHoje > 50 ? "SIM" : "-"
     });
 
-    // Atualizar campo "Acima da Meta" para todos os dias
+    // Atualizar campo "Acima da Meta" para todos os dias e coletar totais
     const totais = [];
     sheet.eachRow((row, idx) => {
       if (idx === 1) return; // ignorar cabeçalho
@@ -71,28 +73,30 @@ async function registrarChamadosAbertos18h() {
       sheet.addRow({ data: "Média", hora: "", total: media });
     }
 
-
     await workbook.xlsx.writeFile(arquivo);
 
+    logToFile(`Snapshot das 18h salvo com ${totalHoje} chamados`);
+    console.log(`📸 Snapshot diário salvo: ${data} - ${totalHoje} chamados`);
 
-    logToFile(`Snapshot das 18h salvo com ${chamados.length} chamados`);
-    console.log(`📸 Snapshot diário salvo: ${data} - ${chamados.length} chamados`);
+    // ALERTAS automáticos
+    if (totalHoje >= 50) {
+      enviarMensagem(`🚨 *Meta diária ULTRAPASSADA!*\nRelatório 18h: ${totalHoje} chamados abertos.`);
+    } else if (totalHoje >= 40) {
+      enviarMensagem(`⚠️ *Atenção!* Já são ${totalHoje} chamados abertos às 18h.\nA meta diária é 50.`);
+    } else {
+      enviarMensagem(`Relatório 18h ${data}: ${totalHoje} chamados abertos.`);
+    }
 
-    // Enviar mensagem no WhatsApp
-    enviarMensagem(`Relatorio 18h ${data}: ${chamados.length} chamados abertos`);
-
-    return chamados.length;
+    return totalHoje;
 
   } catch (err) {
     console.error("Erro ao registrar snapshot das 18h:", err);
     logToFile("❌ Erro ao salvar snapshot das 18h: " + err.message);
-    
+
     if (err.response) {
       console.error("🔴 Resposta do servidor:", err.response.status, err.response.data);
     }
   }
-  
 }
-
 
 module.exports = { registrarChamadosAbertos18h };

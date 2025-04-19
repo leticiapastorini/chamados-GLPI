@@ -44,8 +44,11 @@ async function carregarDias() {
         count++;
       });
 
-    const media = dados.media || 0;
-    document.getElementById("mediaDias").textContent = `📊 Média de chamados abertos por dia: ${media}`;
+    const media = count ? Math.round(total / count) : 0;
+    document.getElementById("mediaDias").textContent =
+      count
+        ? `📊 Média de chamados filtrados: ${media}`
+        : "📊 Nenhum registro encontrado para o filtro selecionado";
   } catch (error) {
     console.error("❌ Erro ao carregar dados dos dias:", error);
     alert("Erro ao carregar dados dos dias.");
@@ -53,15 +56,11 @@ async function carregarDias() {
 }
 
 // ------------------------------------------------------------------
-// Registra listeners tanto em carregamento direto (HTML estático)
-// quanto quando o script é injetado depois que a página já terminou
-// de carregar (modo SPA).
-// ------------------------------------------------------------------
 function inicializarDias() {
   const botaoBuscar = document.getElementById("buscarBtn");
   if (botaoBuscar && !botaoBuscar.dataset.listener) {
     botaoBuscar.addEventListener("click", carregarDias);
-    botaoBuscar.dataset.listener = "on";          // evita registrar 2×
+    botaoBuscar.dataset.listener = "on";
   }
 
   const mesInput = document.getElementById("mesFiltro");
@@ -70,14 +69,10 @@ function inicializarDias() {
   }
 }
 
-// ➜ Caso a página seja carregada como arquivo HTML tradicional
 document.addEventListener("DOMContentLoaded", inicializarDias);
-
-// ➜ Caso o script seja injetado depois que DOMContentLoaded já passou
 if (document.readyState !== "loading") {
   inicializarDias();
 }
-
 
 async function baixarExcel() {
   const mes = document.getElementById("mesFiltro").value;

@@ -1,15 +1,26 @@
 // app.js  –  SPA com History API e detecção de rota inicial
 
 const rotas = {
-  home: "/views/home.html",
-  detalhes: "/views/detalhes.html",
-  dias: "/views/dias.html",
-  rel18h:  "/views/18h.html"
+  home: "views/home.html",
+  detalhes: "views/detalhes.html",
+  dias: "views/dias.html",
+  rel18h:  "views/18h.html"
 };
 
 // ↔  ligação entre página e URL “bonita”
-const pathPorPagina = { home: "/", detalhes: "/detalhes", dias: "/dias", rel18h: "/18h"};
-const paginaPorPath = { "/": "home", "/detalhes": "detalhes", "/dias": "dias" , "/18h": "18h"};
+const pathPorPagina = {
+  home: "/",
+  detalhes: "/detalhes",
+  dias: "/dias",
+  rel18h: "/18h"
+};
+
+const paginaPorPath = {
+  "/": "home",
+  "/detalhes": "detalhes",
+  "/dias": "dias",
+  "/18h": "rel18h"
+};
 
 async function navegar(pagina, push = true) {
   const caminho = rotas[pagina];
@@ -33,15 +44,15 @@ async function navegar(pagina, push = true) {
 
 function carregarScripts(pagina) {
   const scripts = {
-        home: ["/js/home.js"],
-        detalhes: [
-          "https://cdn.jsdelivr.net/npm/chart.js",   // 1º – biblioteca
-          "/js/charts.js",                           // 2º – helpers
-          "/js/gerar_relatorio.js"                   // 3º – busca & monta gráfico
-        ],
-        dias: ["/js/dias.js"],
-        rel18h:  ["/js/relatorio18h.js"]
-      };
+    home: ["js/home.js"],
+    detalhes: [
+      "https://cdn.jsdelivr.net/npm/chart.js",
+      "js/charts.js",
+      "js/gerar_relatorio.js"
+    ],
+    dias: ["js/dias.js"],
+    rel18h: ["js/relatorio18h.js"]
+  };
 
   (scripts[pagina] || []).forEach(src => {
     const s = document.createElement("script");
