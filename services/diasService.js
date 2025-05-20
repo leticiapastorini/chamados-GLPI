@@ -4,6 +4,7 @@ const fs   = require("fs");
 const ExcelJS = require("exceljs");
 const { obterTodosChamados } = require("./glpiService");
 const { logToFile }          = require("../utils/logger");
+const { saveDailySummary }   = require("./dbService");  // importa a função de resumo :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
 
 const PASTA_RELATORIOS = path.join(__dirname, "..", "relatorios");
 if (!fs.existsSync(PASTA_RELATORIOS)) {
@@ -90,6 +91,15 @@ async function registrarDiaChamados() {
         total: Number(r.getCell(2).value)
       }))
     }));
+ // → Persiste o resumo diário no Postgres
+ // vida útil: date (YYYY-MM-DD), totalChamados, acimaMeta (boolean)
+ await saveDailySummary(
+  hoje,                  // string 'YYYY-MM-DD'
+  totalHoje,             // número de chamados hoje
+  totalHoje > 50         // true se ultrapassou a meta
+  );
+  
+  console.log(`💾 Resumo diário gravado no DB: ${hoje} → ${totalHoje}`);  // feedback no console
 
     logToFile(`✅ Registro diário concluído: ${totalHoje} chamados (${hoje})`);
   } catch (err) {

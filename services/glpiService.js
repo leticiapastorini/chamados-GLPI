@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const axios = require("axios");
 
 const APP_TOKEN = "vEZzuTcI02kgcKl3UQUgfvd2q3zq2riklGdy2R6x";
@@ -7,6 +9,8 @@ const API_URL = process.env.API_URL ||
   (process.env.NODE_ENV === "production"
     ? process.env.API_URL_PROD
     : process.env.API_URL_DEV);
+    
+    console.log("→ GLPI API URL =", API_URL);
 
 const STATUS_MAP = {
   1: "Novo",

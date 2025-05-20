@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const ExcelJS = require("exceljs");
 const { obterChamadosAbertos } = require("./glpiService");
+const { saveSnapshot }         = require("./dbService");
 const { logToFile } = require("../utils/logger");
 const { enviarMensagem } = require("./notifyService");
 
@@ -10,6 +11,35 @@ async function registrarChamadosAbertos18h() {
     const chamados = await obterChamadosAbertos();
     const agora = new Date();
 
+    // → Grava também no banco PostgreSQL
+    // mapeia { id, titulo, status, data } → { id, title, status, created_at }
+
+    await saveSnapshot(
+      chamados.map(c => {
+        // garante título válido
+        const title = c.titulo || "Sem título";
+        // API costuma retornar algo como "2025-05-13 16:21:32"
+        // converte para ISO (`T`) ou usa o valor raw se já estiver em ISO
+        let createdAt = c.data;
+        if (typeof createdAt === "string" && createdAt.includes(" ")) {
+          createdAt = createdAt.replace(" ", "T");
+        }
+        // fallback para agora caso createdAt não seja string válida
+        if (!createdAt || isNaN(new Date(createdAt))) {
+          createdAt = new Date().toISOString();
+        }
+        return {
+          id:          c.id,
+          title,
+          status:      c.status,
+          created_at:  createdAt,
+        };
+      }),
+      new Date() // snapshotDate
+    );
+
+    
+    logToFile()
     const data = agora.toISOString().split("T")[0];
     const hora = agora.toTimeString().split(" ")[0].substring(0, 5);
     const anoMes = data.substring(0, 7); // yyyy-MM
